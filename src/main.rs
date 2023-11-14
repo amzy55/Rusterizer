@@ -15,21 +15,18 @@ fn raster_triangle(v0: &Vertex, v1: &Vertex, v2: &Vertex, triangle_area: f32, bu
     // iterating over the buffer
     for (i, pixel) in buffer.iter_mut().enumerate()
     {
-        let point = Vec2::new((i % WIDTH) as f32 + offset.x, (i / WIDTH) as f32 + offset.y);
+        let point = Vec2::new((i % WIDTH) as f32 - offset.x, (i / WIDTH) as f32 - offset.y);
         let bary_options = barycentric_coords(point, v0.pos, v1.pos, v2.pos, triangle_area);
-        *pixel = match bary_options {
-            Some(bary) => {
-                let color = bary.x * v0.color + bary.y * v1.color + bary.z * v2.color;
-                from_u8_rgb(
-                    (color.x * 255.0) as u8,
-                    (color.y * 255.0) as u8,
-                    (color.z * 255.0) as u8,
-                )
-            }
-            _ => 0, // from_u8_rgb(255.0 as u8, 255.0 as u8, 255.0 as u8)
+        if let Some(bary) = barycentric_coords(point, v0.pos, v1.pos, v2.pos, triangle_area) {
+            let color = bary.x * v0.color + bary.y * v1.color + bary.z * v2.color;
+            *pixel = from_u8_rgb(
+                (color.x * 255.0) as u8,
+                (color.y * 255.0) as u8,
+                (color.z * 255.0) as u8,
+            )
+        }
         }
     }
-}
 
 fn input_handling(window: &Window, offset: &mut Vec2) {
     let move_by: f32 = 5.0;
@@ -75,13 +72,29 @@ fn main() {
         pos: Vec2::new(WIDTH as f32 / 3.0 * 2.0, 50.0),
         color: Vec3::new(0.0, 1.0, 1.0),
     };
+    let t1_area = edge_function(v0.pos, v1.pos, v2.pos);
 
-    let triangle_area = edge_function(v0.pos, v1.pos, v2.pos);
+    let v3 = Vertex {
+        pos: Vec2::new(WIDTH as f32 / 3.0 + 50.0, 30.0),
+        color: Vec3::new(1.0, 0.0, 0.0),
+    };
+    let v4 = Vertex {
+        pos: Vec2::new(WIDTH as f32 / 2.0 + 50.0, 280.0),
+        color: Vec3::new(0.0, 1.0, 0.0),
+    };
+    let v5 = Vertex {
+        pos: Vec2::new(WIDTH as f32 / 3.0 * 2.0 + 50.0, 30.0),
+        color: Vec3::new(0.0, 0.0, 1.0),
+    };
+    let t2_area = edge_function(v0.pos, v1.pos, v2.pos);
+
     let mut offset = Vec2::new(0.0, 0.0);
     
     while window.is_open() && !window.is_key_down(Key::Escape) {
         input_handling(&window, &mut offset);
-        raster_triangle(&v0, &v1, &v2, triangle_area, &mut buffer, offset);
+        buffer.fill(0);
+        raster_triangle(&v0, &v1, &v2, t1_area, &mut buffer, offset);
+        raster_triangle(&v3, &v4, &v5, t2_area, &mut buffer, offset);
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
 }
