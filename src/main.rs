@@ -1,10 +1,15 @@
 use minifb::{Key, Window, WindowOptions};
-use glam::Vec2;
+use glam::{Vec2, Vec3};
 pub mod utils;
 pub use utils::*;
 
 const WIDTH: usize = 640;
 const HEIGHT: usize = 360;
+
+pub struct Vertex {
+    pub pos: Vec2,
+    pub color: Vec3
+}
 
 fn input_handling(window: &Window,  offset: &mut Vec2) {
     let move_by: f32 = 5.0;
@@ -38,10 +43,19 @@ fn main() {
     // Limit to max ~60 fps update rate
     window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
-    let v0: Vec2 = Vec2::new(WIDTH as f32 / 3.0, 50.0);
-    let v1 = Vec2::new(WIDTH as f32 / 2.0, 300.0);
-    let v2 = Vec2::new(WIDTH as f32 / 3.0 * 2.0, 50.0);
-    let triangle_area = edge_function(v0, v1, v2);
+    let v0 = Vertex {
+        pos: Vec2::new(WIDTH as f32 / 3.0, 50.0),
+        color: Vec3::new(1.0, 1.0, 0.0)
+    };
+    let v1 = Vertex {
+        pos: Vec2::new(WIDTH as f32 / 2.0, 300.0),
+        color: Vec3::new(1.0, 0.0, 1.0)
+    };
+    let v2 = Vertex {
+        pos: Vec2::new(WIDTH as f32 / 3.0 * 2.0, 50.0),
+        color: Vec3::new(0.0, 1.0, 1.0)
+    };
+    let triangle_area = edge_function(v0.pos, v1.pos, v2.pos);
 
     let mut offset = Vec2::new(0.0, 0.0);
 
@@ -52,9 +66,12 @@ fn main() {
                 (i % WIDTH) as f32 + offset.x,
                 (i / WIDTH) as f32 + offset.y);
 
-            let bary_options = barycentric_coords(point, v0, v1, v2, triangle_area);
+            let bary_options = barycentric_coords(point, v0.pos, v1.pos, v2.pos, triangle_area);
             buffer[i] = match bary_options {
-                Some(bary) => from_u8_rgb((bary.x * 255.0) as u8, (bary.y * 255.0) as u8, (bary.z * 255.0) as u8),
+                Some(bary) => {
+                    let color = bary.x * v0.color + bary.y * v1.color + bary.z * v2.color;
+                    from_u8_rgb((color.x * 255.0) as u8, (color.y * 255.0) as u8, (color.z * 255.0) as u8)
+                }
                 _ => 0 // from_u8_rgb(255.0 as u8, 255.0 as u8, 255.0 as u8)
             }
 
