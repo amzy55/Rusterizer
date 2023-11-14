@@ -13,7 +13,13 @@ pub fn edge_function(point: Vec2, v0: Vec2, v1: Vec2) -> f32 {
     seg_a.x * seg_b.y - seg_a.y * seg_b.x
 }
 
-pub fn barycentric_coords(point: Vec2, v0: Vec2, v1: Vec2, v2: Vec2, triangle_area: f32) -> Option<Vec3> {
+pub fn barycentric_coords(
+    point: Vec2,
+    v0: Vec2,
+    v1: Vec2,
+    v2: Vec2,
+    triangle_area: f32,
+) -> Option<Vec3> {
     // w - weight
     let w0 = edge_function(point, v0, v1);
     let w1 = edge_function(point, v1, v2);
@@ -24,10 +30,12 @@ pub fn barycentric_coords(point: Vec2, v0: Vec2, v1: Vec2, v2: Vec2, triangle_ar
 
     if w0 <= 0.0 && w1 <= 0.0 && w2 <= 0.0 {
         // Vec3::new(w0 * reverse_area, w1 * reverse_area, w2 * reverse_area)
-        Some(Vec3{x: w0 * reverse_area, y: w1 * reverse_area, z: w2 * reverse_area})
-    }
-    else {
+        Some(Vec3 {
+            x: w0 * reverse_area,
+            y: w1 * reverse_area,
+            z: w2 * reverse_area,
+        })
+    } else {
         None
     }
-
 }
