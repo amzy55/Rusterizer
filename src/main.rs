@@ -52,9 +52,12 @@ fn main() {
                 (i % WIDTH) as f32 + offset.x,
                 (i / WIDTH) as f32 + offset.y);
 
-            let bary = barycentric_coords(point, v0, v1, v2, triangle_area);
+            let bary_options = barycentric_coords(point, v0, v1, v2, triangle_area);
+            buffer[i] = match bary_options {
+                Some(bary) => from_u8_rgb((bary.x * 255.0) as u8, (bary.y * 255.0) as u8, (bary.z * 255.0) as u8),
+                _ => 0 // from_u8_rgb(255.0 as u8, 255.0 as u8, 255.0 as u8)
+            }
 
-            buffer[i] = from_u8_rgb((bary.x * 255.0) as u8, (bary.y * 255.0) as u8, (bary.z * 255.0) as u8);
         }
 
         // We unwrap here as we want this code to exit if it fails. Real applications may want to handle this in a different way
