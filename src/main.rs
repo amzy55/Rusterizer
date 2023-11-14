@@ -11,12 +11,17 @@ pub struct Vertex {
     pub color: Vec3,
 }
 
-fn raster_triangle(v0: &Vertex, v1: &Vertex, v2: &Vertex, triangle_area: f32, buffer: &mut Vec<u32>, offset: Vec2) {
+fn raster_triangle(
+    v0: &Vertex,
+    v1: &Vertex,
+    v2: &Vertex,
+    triangle_area: f32,
+    buffer: &mut Vec<u32>,
+    offset: Vec2,
+) {
     // iterating over the buffer
-    for (i, pixel) in buffer.iter_mut().enumerate()
-    {
+    for (i, pixel) in buffer.iter_mut().enumerate() {
         let point = Vec2::new((i % WIDTH) as f32 - offset.x, (i / WIDTH) as f32 - offset.y);
-        let bary_options = barycentric_coords(point, v0.pos, v1.pos, v2.pos, triangle_area);
         if let Some(bary) = barycentric_coords(point, v0.pos, v1.pos, v2.pos, triangle_area) {
             let color = bary.x * v0.color + bary.y * v1.color + bary.z * v2.color;
             *pixel = from_u8_rgb(
@@ -25,8 +30,8 @@ fn raster_triangle(v0: &Vertex, v1: &Vertex, v2: &Vertex, triangle_area: f32, bu
                 (color.z * 255.0) as u8,
             )
         }
-        }
     }
+}
 
 fn input_handling(window: &Window, offset: &mut Vec2) {
     let move_by: f32 = 5.0;
@@ -89,7 +94,7 @@ fn main() {
     let t2_area = edge_function(v0.pos, v1.pos, v2.pos);
 
     let mut offset = Vec2::new(0.0, 0.0);
-    
+
     while window.is_open() && !window.is_key_down(Key::Escape) {
         input_handling(&window, &mut offset);
         buffer.fill(0);
