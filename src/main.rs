@@ -41,6 +41,7 @@ fn main() {
     let v0: Vec2 = Vec2::new(WIDTH as f32 / 3.0, 50.0);
     let v1 = Vec2::new(WIDTH as f32 / 2.0, 300.0);
     let v2 = Vec2::new(WIDTH as f32 / 3.0 * 2.0, 50.0);
+    let triangle_area = edge_function(v0, v1, v2);
 
     let mut offset = Vec2::new(0.0, 0.0);
 
@@ -51,11 +52,9 @@ fn main() {
                 (i % WIDTH) as f32 + offset.x,
                 (i / WIDTH) as f32 + offset.y);
 
-            let a = edge_function(point, v0, v2);
-            let b = edge_function(point, v2, v1);
-            let c = edge_function(point, v1, v0);
-            
-            buffer[i] = from_u8_rgb((a * 255.0) as u8, (b * 255.0) as u8, (c * 255.0) as u8);
+            let bary = barycentric_coords(point, v0, v1, v2, triangle_area);
+
+            buffer[i] = from_u8_rgb((bary.x * 255.0) as u8, (bary.y * 255.0) as u8, (bary.z * 255.0) as u8);
         }
 
         // We unwrap here as we want this code to exit if it fails. Real applications may want to handle this in a different way
