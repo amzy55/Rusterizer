@@ -1,4 +1,4 @@
-use glam::{Vec3, Vec3Swizzles};
+use glam::{Vec2, Vec3, Vec3Swizzles};
 use crate::texture::*;
 use crate::utils::*;
 
@@ -6,6 +6,7 @@ use crate::utils::*;
 pub struct Vertex {
     pub pos: Vec3,
     pub color: Vec3,
+    pub uv: Vec2
 }
 
 pub struct Triangle {
