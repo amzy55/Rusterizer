@@ -29,10 +29,22 @@ pub fn raster_triangle(
     let clip1 = mvp * Vec4::from((vertices[1].pos, 1.0));
     let clip2 = mvp * Vec4::from((vertices[2].pos, 1.0));
 
+    let rec0 = 1.0 / clip0.w;
+    let rec1 = 1.0 / clip1.w;
+    let rec2 = 1.0 / clip2.w;
+
+    let uv0 = vertices[0].uv * rec0;
+    let uv1 = vertices[1].uv * rec1;
+    let uv2 = vertices[2].uv * rec2;
+
+    let color0 = vertices[0].color * rec0;
+    let color1 = vertices[1].color * rec1;
+    let color2 = vertices[2].color * rec2;
+
     // normalized device coordinates -> between -1 and 1
-    let ndc0 = clip0 / clip0.w;
-    let ndc1 = clip1 / clip1.w;
-    let ndc2 = clip2 / clip2.w;
+    let ndc0 = clip0 * rec0;
+    let ndc1 = clip1 * rec1;
+    let ndc2 = clip2 * rec2;
 
     // screen coordinates remapped to window
     let sc0 = glam::vec2(
@@ -57,19 +69,23 @@ pub fn raster_triangle(
             (i as f32 + 0.5) / viewport_size.x,
         );
         if let Some(bary) = barycentric_coords(point, sc0, sc1, sc2, triangle_area) {
+            let correction = bary.x * rec0 + bary.y * rec1 + bary.z * rec2;
+            let correction = 1.0 / correction;
             let depth = bary.x * vertices[0].pos.z
                 + bary.y * vertices[1].pos.z
                 + bary.z * vertices[2].pos.z;
             if depth < z_buffer[i] {
+                z_buffer[i] = depth;
                 let color = bary.x * vertices[0].color
                     + bary.y * vertices[1].color
                     + bary.z * vertices[2].color;
-                z_buffer[i] = depth;
+                let color = color * correction;
                 match texture {
                     Some(texture) => {
-                        let tex_coords = bary.x * vertices[0].uv
-                            + bary.y * vertices[1].uv
-                            + bary.z * vertices[2].uv;
+                        let tex_coords = bary.x * uv0
+                            + bary.y * uv1
+                            + bary.z * uv2;
+                        let tex_coords = tex_coords * correction;
                         let tex_color = texture.rgb_at_uv(tex_coords.x, tex_coords.y);
                         let r = (tex_color >> 16) as u8;
                         let g = (tex_color >> 8) as u8;
