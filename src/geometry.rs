@@ -29,11 +29,11 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    pub fn get_vertices_from_triangle_indices(&self, triangle_indices: UVec3) -> [&Vertex; 3] {
+    pub fn get_vertices_from_triangle_indices(&self, triangle_indices: UVec3) -> [Vertex; 3] {
         [
-            &self.vertices[triangle_indices.x as usize],
-            &self.vertices[triangle_indices.y as usize],
-            &self.vertices[triangle_indices.z as usize],
+            self.vertices[triangle_indices.x as usize],
+            self.vertices[triangle_indices.y as usize],
+            self.vertices[triangle_indices.z as usize],
         ]
     }
 }

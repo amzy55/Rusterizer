@@ -1,4 +1,4 @@
-use glam::{Vec2, Vec3};
+use glam::{Vec2, Vec3, UVec3};
 use minifb::{Key, Window, WindowOptions};
 use std::path::Path;
 
@@ -47,7 +47,7 @@ fn main() {
     let top_left = Vec2::new(200.0, 30.0);
     let bottom_right = top_left + side;
 
-    let triangle1: Vec<Vertex> = vec![
+    let triangle1 = [
         Vertex {
             pos: Vec3::new(top_left.x, top_left.y, 0.0),
             color: Vec3::new(1.0, 1.0, 0.0),
@@ -65,7 +65,7 @@ fn main() {
         },
     ];
 
-    let triangle2: Vec<Vertex> = vec![
+    let triangle2 = [
         Vertex {
             pos: Vec3::new(bottom_right.x, top_left.y, 0.0),
             color: Vec3::new(1.0, 1.0, 0.0),
@@ -83,14 +83,18 @@ fn main() {
         },
     ];
 
+    let quad = Mesh {
+        triangle_indices: vec![UVec3::new(0, 1, 2), UVec3::new(2, 1, 3)],
+        vertices: vec![triangle1[0], triangle1[1], triangle1[2], triangle2[2]]
+    };
+
     let mut offset = Vec2::new(0.0, 0.0);
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
         input_handling(&window, &mut offset);
         buffer.fill(0);
         z_buffer.fill(f32::INFINITY);
-        raster_triangle(&triangle1, Some(&texture), &mut buffer, &mut z_buffer, window_size,  offset);
-        raster_triangle(&triangle2, Some(&texture),&mut buffer, &mut z_buffer, window_size, offset);
+        raster_mesh(&quad, &texture, &mut buffer, &mut z_buffer, window_size, offset);
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
 }
