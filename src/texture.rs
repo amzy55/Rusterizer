@@ -6,7 +6,7 @@ pub struct Texture {
     pub width: usize,
     pub height: usize,
     pub data: Vec<u32>,
-    pub depth: usize
+    pub depth: usize,
 }
 
 impl Texture {
@@ -26,7 +26,7 @@ impl Texture {
             Self {
                 width: image.width,
                 height: image.height,
-                data, 
+                data,
                 depth: image.depth,
             }
         } else {

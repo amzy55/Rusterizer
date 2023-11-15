@@ -1,10 +1,10 @@
-use glam::{Vec2, Vec3, UVec3};
+use glam::{UVec3, Vec2, Vec3};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vertex {
     pub pos: Vec3,
     pub color: Vec3,
-    pub uv: Vec2
+    pub uv: Vec2,
 }
 
 pub struct Triangle {
@@ -25,7 +25,7 @@ impl Triangle {
 
 pub struct Mesh {
     pub triangle_indices: Vec<UVec3>,
-    pub vertices: Vec<Vertex>
+    pub vertices: Vec<Vertex>,
 }
 
 impl Mesh {
