@@ -37,9 +37,9 @@ pub fn raster_triangle(
     let uv1 = vertices[1].uv * rec1;
     let uv2 = vertices[2].uv * rec2;
 
-    let color0 = vertices[0].color * rec0;
-    let color1 = vertices[1].color * rec1;
-    let color2 = vertices[2].color * rec2;
+    // let color0 = vertices[0].color * rec0;
+    // let color1 = vertices[1].color * rec1;
+    // let color2 = vertices[2].color * rec2;
 
     // normalized device coordinates -> between -1 and 1
     let ndc0 = clip0 * rec0;
@@ -71,9 +71,7 @@ pub fn raster_triangle(
         if let Some(bary) = barycentric_coords(point, sc0, sc1, sc2, triangle_area) {
             let correction = bary.x * rec0 + bary.y * rec1 + bary.z * rec2;
             let correction = 1.0 / correction;
-            let depth = bary.x * vertices[0].pos.z
-                + bary.y * vertices[1].pos.z
-                + bary.z * vertices[2].pos.z;
+            let depth = bary.x * ndc0.z + bary.y * ndc1.z + bary.z * ndc2.z;
             if depth < z_buffer[i] {
                 z_buffer[i] = depth;
                 let color = bary.x * vertices[0].color
@@ -82,9 +80,7 @@ pub fn raster_triangle(
                 let color = color * correction;
                 match texture {
                     Some(texture) => {
-                        let tex_coords = bary.x * uv0
-                            + bary.y * uv1
-                            + bary.z * uv2;
+                        let tex_coords = bary.x * uv0 + bary.y * uv1 + bary.z * uv2;
                         let tex_coords = tex_coords * correction;
                         let tex_color = texture.rgb_at_uv(tex_coords.x, tex_coords.y);
                         let r = (tex_color >> 16) as u8;

@@ -28,7 +28,7 @@ pub fn barycentric_coords(
     // 1 division instead of 3
     let reverse_area = 1.0 / triangle_area;
 
-    if (w0 <= 0.0 && w1 <= 0.0 && w2 <= 0.0) || (w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0){
+    if (w0 <= 0.0 && w1 <= 0.0 && w2 <= 0.0) || (w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0) {
         // Vec3::new(w0 * reverse_area, w1 * reverse_area, w2 * reverse_area)
         Some(Vec3 {
             x: w0 * reverse_area,
