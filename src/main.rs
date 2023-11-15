@@ -47,7 +47,7 @@ fn main() {
     let top_left = Vec2::new(200.0, 30.0);
     let bottom_right = top_left + side;
 
-    let triangle1 = Triangle::new(
+    let triangle1: Vec<Vertex> = vec![
         Vertex {
             pos: Vec3::new(top_left.x, top_left.y, 0.0),
             color: Vec3::new(1.0, 1.0, 0.0),
@@ -63,9 +63,9 @@ fn main() {
             color: Vec3::new(0.0, 1.0, 1.0),
             uv: glam::vec2(1.0, 0.0),
         },
-    );
+    ];
 
-    let triangle2 = Triangle::new(
+    let triangle2: Vec<Vertex> = vec![
         Vertex {
             pos: Vec3::new(bottom_right.x, top_left.y, 0.0),
             color: Vec3::new(1.0, 1.0, 0.0),
@@ -81,7 +81,7 @@ fn main() {
             color: Vec3::new(0.0, 1.0, 1.0),
             uv: glam::vec2(1.0, 1.0),
         },
-    );
+    ];
 
     let mut offset = Vec2::new(0.0, 0.0);
 

@@ -1,4 +1,4 @@
-use glam::{Vec2, Vec3};
+use glam::{Vec2, Vec3, UVec3};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vertex {
@@ -20,5 +20,20 @@ impl Triangle {
             v1: v1,
             v2: v2,
         }
+    }
+}
+
+pub struct Mesh {
+    pub triangle_indices: Vec<UVec3>,
+    pub vertices: Vec<Vertex>
+}
+
+impl Mesh {
+    pub fn get_vertices_from_triangle_indices(&self, triangle_indices: UVec3) -> [&Vertex; 3] {
+        [
+            &self.vertices[triangle_indices.x as usize],
+            &self.vertices[triangle_indices.y as usize],
+            &self.vertices[triangle_indices.z as usize],
+        ]
     }
 }
