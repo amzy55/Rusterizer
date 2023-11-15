@@ -19,12 +19,13 @@ pub fn raster_triangle(
     window_size: Vec2,
     offset: Vec2,
 ) {
+    let triangle_area = edge_function(triangle.v0.pos.xy(), triangle.v1.pos.xy(), triangle.v2.pos.xy());
     // iterating over the buffer
     for (i, pixel) in buffer.iter_mut().enumerate() {
         // +0.5 to take the center of the pixel
         let point = Vec2::new(i as f32 % window_size.x + offset.x, i as f32 / window_size.x + offset.y) + 0.5;
         if let Some(bary) =
-            barycentric_coords(point, triangle.v0.pos.xy(), triangle.v1.pos.xy(), triangle.v2.pos.xy(), triangle.triangle_area)
+            barycentric_coords(point, triangle.v0.pos.xy(), triangle.v1.pos.xy(), triangle.v2.pos.xy(), triangle_area)
         {
             let depth = bary.x * triangle.v0.pos.z + bary.y * triangle.v1.pos.z + bary.z * triangle.v2.pos.z;
             if depth < z_buffer[i] {

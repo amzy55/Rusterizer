@@ -1,5 +1,4 @@
-use glam::{Vec2, Vec3, Vec3Swizzles};
-use crate::utils::*;
+use glam::{Vec2, Vec3};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vertex {
@@ -12,7 +11,6 @@ pub struct Triangle {
     pub v0: Vertex,
     pub v1: Vertex,
     pub v2: Vertex,
-    pub triangle_area: f32,
 }
 
 impl Triangle {
@@ -21,7 +19,6 @@ impl Triangle {
             v0: v0,
             v1: v1,
             v2: v2,
-            triangle_area: edge_function(v0.pos.xy(), v1.pos.xy(), v2.pos.xy()),
         }
     }
 }
