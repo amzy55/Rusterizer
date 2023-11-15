@@ -103,7 +103,7 @@ fn main() {
             color: Vec3::new(0.0, 1.0, 1.0),
             uv: glam::vec2(1.0, 0.0),
         },
-        Some(texture)
+        Some(&texture)
     );
 
     let triangle2 = Triangle::new(
@@ -122,7 +122,7 @@ fn main() {
             color: Vec3::new(0.0, 1.0, 1.0),
             uv: glam::vec2(1.0, 1.0),
         },
-        Some(texture_copy)
+        Some(&texture)
     );
 
     let mut offset = Vec2::new(0.0, 0.0);

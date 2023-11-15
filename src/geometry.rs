@@ -9,16 +9,16 @@ pub struct Vertex {
     pub uv: Vec2
 }
 
-pub struct Triangle {
+pub struct Triangle<'t> {
     pub v0: Vertex,
     pub v1: Vertex,
     pub v2: Vertex,
     pub triangle_area: f32,
-    pub texture: Option<Texture>
+    pub texture: Option<&'t Texture>
 }
 
-impl Triangle {
-    pub fn new(v0: Vertex, v1: Vertex, v2: Vertex, texture: Option<Texture>) -> Self {
+impl<'t> Triangle<'t> {
+    pub fn new(v0: Vertex, v1: Vertex, v2: Vertex, texture: Option<&'t Texture>) -> Self {
         Self {
             v0: v0,
             v1: v1,
