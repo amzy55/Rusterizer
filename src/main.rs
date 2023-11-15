@@ -91,18 +91,21 @@ fn main() {
     let aspect_ratio = WIDTH as f32 / HEIGHT as f32;
     let camera = Camera {
         aspect_ratio,
-        transform: Transform::from_translation(glam::vec3(0.0, 0.0, 1.0)),
+        transform: Transform::from_translation(glam::vec3(0.0, 0.0, 1.5)),
         frustum_far: 100.0,
         ..Default::default()
     };
 
+    let mut rot = 0.0;
     while window.is_open() && !window.is_key_down(Key::Escape) {
         // input_handling(&window, &mut offset);
         buffer.fill(0);
         z_buffer.fill(f32::INFINITY);
+        let transform =
+        Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0));
         raster_mesh(
             &quad,
-            &Transform::IDENTITY.local(),
+            &transform.local(),
             &camera.view(),
             &camera.projection(),
             &texture,
@@ -110,6 +113,7 @@ fn main() {
             &mut z_buffer,
             window_size,
         );
+        rot += 0.05;
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
 }
