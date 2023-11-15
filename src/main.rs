@@ -13,6 +13,7 @@ const HEIGHT: usize = 360;
 
 fn raster_triangle(
     triangle: &Triangle,
+    texture: Option<&Texture>,
     buffer: &mut Vec<u32>,
     z_buffer: &mut Vec<f32>,
     offset: Vec2,
@@ -27,7 +28,7 @@ fn raster_triangle(
             let depth = bary.x * triangle.v0.pos.z + bary.y * triangle.v1.pos.z + bary.z * triangle.v2.pos.z;
             if depth < z_buffer[i] {
                 z_buffer[i] = depth;
-                match &triangle.texture {
+                match texture {
                     Some(texture) => {
                         let tex_coords = bary.x * triangle.v0.uv + bary.y * triangle.v1.uv + bary.z * triangle.v2.uv;
                         let color = texture.rgb_at_uv(tex_coords.x, tex_coords.y);
@@ -81,7 +82,6 @@ fn main() {
     window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
     let texture = Texture::load(Path::new("assets/giorno_stare_1024.jpg"));
-    let texture_copy = Texture::load(Path::new("assets/giorno_stare_1024.jpg"));
 
     let side: f32 = 300.0;
     let top_left = Vec2::new(200.0, 30.0);
@@ -103,7 +103,6 @@ fn main() {
             color: Vec3::new(0.0, 1.0, 1.0),
             uv: glam::vec2(1.0, 0.0),
         },
-        Some(&texture)
     );
 
     let triangle2 = Triangle::new(
@@ -122,7 +121,6 @@ fn main() {
             color: Vec3::new(0.0, 1.0, 1.0),
             uv: glam::vec2(1.0, 1.0),
         },
-        Some(&texture)
     );
 
     let mut offset = Vec2::new(0.0, 0.0);
@@ -131,8 +129,8 @@ fn main() {
         input_handling(&window, &mut offset);
         buffer.fill(0);
         z_buffer.fill(f32::INFINITY);
-        raster_triangle(&triangle1, &mut buffer, &mut z_buffer, offset);
-        raster_triangle(&triangle2, &mut buffer, &mut z_buffer, offset);
+        raster_triangle(&triangle1, Some(&texture), &mut buffer, &mut z_buffer, offset);
+        raster_triangle(&triangle2, Some(&texture),&mut buffer, &mut z_buffer, offset);
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
 }
