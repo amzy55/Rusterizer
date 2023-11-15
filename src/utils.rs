@@ -21,9 +21,9 @@ pub fn barycentric_coords(
     triangle_area: f32,
 ) -> Option<Vec3> {
     // w - weight
-    let w0 = edge_function(point, v0, v1);
-    let w1 = edge_function(point, v1, v2);
-    let w2 = edge_function(point, v2, v0);
+    let w0 = edge_function(point, v1, v2);
+    let w1 = edge_function(point, v2, v0);
+    let w2 = edge_function(point, v0, v1);
 
     // 1 division instead of 3
     let reverse_area = 1.0 / triangle_area;

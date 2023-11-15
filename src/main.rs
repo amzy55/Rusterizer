@@ -19,7 +19,8 @@ fn raster_triangle(
 ) {
     // iterating over the buffer
     for (i, pixel) in buffer.iter_mut().enumerate() {
-        let point = Vec2::new((i % WIDTH) as f32 - offset.x, (i / WIDTH) as f32 - offset.y);
+        // +0.5 to take the center of the pixel
+        let point = Vec2::new((i % WIDTH) as f32 - offset.x, (i / WIDTH) as f32 - offset.y) + 0.5;
         if let Some(bary) =
             barycentric_coords(point, triangle.v0.pos.xy(), triangle.v1.pos.xy(), triangle.v2.pos.xy(), triangle.triangle_area)
         {
@@ -80,41 +81,49 @@ fn main() {
     window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
     let texture = Texture::load(Path::new("assets/giorno_stare_1024.jpg"));
+    let texture_copy = Texture::load(Path::new("assets/giorno_stare_1024.jpg"));
+
+    let side: f32 = 300.0;
+    let top_left = Vec2::new(200.0, 30.0);
+    let bottom_right = top_left + side;
 
     let triangle1 = Triangle::new(
         Vertex {
-            pos: Vec3::new(WIDTH as f32 / 3.0, 50.0, 0.0),
+            pos: Vec3::new(top_left.x, top_left.y, 0.0),
             color: Vec3::new(1.0, 1.0, 0.0),
-            uv: glam::vec2(1.0, 0.0),
-        },
-        Vertex {
-            pos: Vec3::new(WIDTH as f32 / 2.0, 300.0, 0.0),
-            color: Vec3::new(1.0, 0.0, 1.0),
-            uv: glam::vec2(0.5, 1.0),
-        },
-        Vertex {
-            pos: Vec3::new(WIDTH as f32 / 3.0 * 2.0, 50.0, 0.0),
-            color: Vec3::new(0.0, 1.0, 1.0),
             uv: glam::vec2(0.0, 0.0),
+        },
+        Vertex {
+            pos: Vec3::new(top_left.x, bottom_right.y, 0.0),
+            color: Vec3::new(1.0, 0.0, 1.0),
+            uv: glam::vec2(0.0, 1.0),
+        },
+        Vertex {
+            pos: Vec3::new(bottom_right.x, top_left.y, 0.0),
+            color: Vec3::new(0.0, 1.0, 1.0),
+            uv: glam::vec2(1.0, 0.0),
         },
         Some(texture)
     );
 
-    // let triangle2 = Triangle::new(
-    //     Vertex {
-    //         pos: Vec3::new(WIDTH as f32 / 3.0 + 50.0, 30.0, 1.0),
-    //         color: Vec3::new(1.0, 0.0, 0.0),
-    //     },
-    //     Vertex {
-    //         pos: Vec3::new(WIDTH as f32 / 2.0 + 50.0, 280.0, 1.0),
-    //         color: Vec3::new(0.0, 1.0, 0.0),
-    //     },
-    //     Vertex {
-    //         pos: Vec3::new(WIDTH as f32 / 3.0 * 2.0 + 50.0, 30.0, 1.0),
-    //         color: Vec3::new(0.0, 0.0, 1.0),
-    //     },
-    //     None
-    // );
+    let triangle2 = Triangle::new(
+        Vertex {
+            pos: Vec3::new(bottom_right.x, top_left.y, 0.0),
+            color: Vec3::new(1.0, 1.0, 0.0),
+            uv: glam::vec2(1.0, 0.0),
+        },
+        Vertex {
+            pos: Vec3::new(top_left.x, bottom_right.y, 0.0),
+            color: Vec3::new(1.0, 0.0, 1.0),
+            uv: glam::vec2(0.0, 1.0),
+        },
+        Vertex {
+            pos: Vec3::new(bottom_right.x, bottom_right.y, 0.0),
+            color: Vec3::new(0.0, 1.0, 1.0),
+            uv: glam::vec2(1.0, 1.0),
+        },
+        Some(texture_copy)
+    );
 
     let mut offset = Vec2::new(0.0, 0.0);
 
@@ -123,7 +132,7 @@ fn main() {
         buffer.fill(0);
         z_buffer.fill(f32::INFINITY);
         raster_triangle(&triangle1, &mut buffer, &mut z_buffer, offset);
-        // raster_triangle(&triangle2, &mut buffer, &mut z_buffer, offset);
+        raster_triangle(&triangle2, &mut buffer, &mut z_buffer, offset);
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
 }
