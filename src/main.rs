@@ -1,52 +1,11 @@
-use glam::{Vec2, Vec3, Vec3Swizzles};
+use glam::{Vec2, Vec3};
 use minifb::{Key, Window, WindowOptions};
 use std::path::Path;
-pub mod utils;
-pub use utils::*;
-pub mod geometry;
-pub use geometry::*;
-pub mod texture;
-pub use texture::*;
+
+use rusterizer::*;
 
 const WIDTH: usize = 640;
 const HEIGHT: usize = 360;
-
-fn raster_triangle(
-    triangle: &Triangle,
-    texture: Option<&Texture>,
-    buffer: &mut Vec<u32>,
-    z_buffer: &mut Vec<f32>,
-    offset: Vec2,
-) {
-    // iterating over the buffer
-    for (i, pixel) in buffer.iter_mut().enumerate() {
-        // +0.5 to take the center of the pixel
-        let point = Vec2::new((i % WIDTH) as f32 - offset.x, (i / WIDTH) as f32 - offset.y) + 0.5;
-        if let Some(bary) =
-            barycentric_coords(point, triangle.v0.pos.xy(), triangle.v1.pos.xy(), triangle.v2.pos.xy(), triangle.triangle_area)
-        {
-            let depth = bary.x * triangle.v0.pos.z + bary.y * triangle.v1.pos.z + bary.z * triangle.v2.pos.z;
-            if depth < z_buffer[i] {
-                z_buffer[i] = depth;
-                match texture {
-                    Some(texture) => {
-                        let tex_coords = bary.x * triangle.v0.uv + bary.y * triangle.v1.uv + bary.z * triangle.v2.uv;
-                        let color = texture.rgb_at_uv(tex_coords.x, tex_coords.y);
-                        *pixel = color;
-                    }
-                    None => {
-                        let color = bary.x * triangle.v0.color + bary.y * triangle.v1.color + bary.z * triangle.v2.color;
-                        *pixel = from_u8_rgb(
-                        (color.x * 255.0) as u8,
-                        (color.y * 255.0) as u8,
-                        (color.z * 255.0) as u8,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 fn input_handling(window: &Window, offset: &mut Vec2) {
     let move_by: f32 = 5.0;
@@ -82,6 +41,7 @@ fn main() {
     window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
     let texture = Texture::load(Path::new("assets/giorno_stare_1024.jpg"));
+    let window_size = glam::vec2(WIDTH as f32, HEIGHT as f32);
 
     let side: f32 = 300.0;
     let top_left = Vec2::new(200.0, 30.0);
@@ -129,8 +89,8 @@ fn main() {
         input_handling(&window, &mut offset);
         buffer.fill(0);
         z_buffer.fill(f32::INFINITY);
-        raster_triangle(&triangle1, Some(&texture), &mut buffer, &mut z_buffer, offset);
-        raster_triangle(&triangle2, Some(&texture),&mut buffer, &mut z_buffer, offset);
+        raster_triangle(&triangle1, Some(&texture), &mut buffer, &mut z_buffer, window_size,  offset);
+        raster_triangle(&triangle2, Some(&texture),&mut buffer, &mut z_buffer, window_size, offset);
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
 }
