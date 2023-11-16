@@ -28,7 +28,8 @@ fn input_handling(window: &Window, camera: &mut Camera) {
         axis.z += 1.0;
     }
     camera.transform.translation += camera.transform.right() * camera.speed * axis.x
-    + camera.transform.forward() * camera.speed * axis.y + camera.transform.up() * camera.speed * axis.z;
+        + camera.transform.forward() * camera.speed * axis.y
+        + camera.transform.up() * camera.speed * axis.z;
 }
 
 fn main() {
@@ -55,45 +56,30 @@ fn main() {
     let top_left = Vec2::new(-0.5, -0.5);
     let bottom_right = top_left + side;
 
-    let triangle1 = [
-        Vertex {
-            pos: Vec3::new(top_left.x, top_left.y, 0.0),
-            color: Vec3::new(1.0, 1.0, 0.0),
-            uv: glam::vec2(0.0, 0.0),
-        },
-        Vertex {
-            pos: Vec3::new(top_left.x, bottom_right.y, 0.0),
-            color: Vec3::new(1.0, 0.0, 1.0),
-            uv: glam::vec2(0.0, 1.0),
-        },
-        Vertex {
-            pos: Vec3::new(bottom_right.x, top_left.y, 0.0),
-            color: Vec3::new(0.0, 1.0, 1.0),
-            uv: glam::vec2(1.0, 0.0),
-        },
-    ];
-
-    let triangle2 = [
-        Vertex {
-            pos: Vec3::new(bottom_right.x, top_left.y, 0.0),
-            color: Vec3::new(1.0, 1.0, 0.0),
-            uv: glam::vec2(1.0, 0.0),
-        },
-        Vertex {
-            pos: Vec3::new(top_left.x, bottom_right.y, 0.0),
-            color: Vec3::new(1.0, 0.0, 1.0),
-            uv: glam::vec2(0.0, 1.0),
-        },
-        Vertex {
-            pos: Vec3::new(bottom_right.x, bottom_right.y, 0.0),
-            color: Vec3::new(0.0, 1.0, 1.0),
-            uv: glam::vec2(1.0, 1.0),
-        },
-    ];
+    let v0 = Vertex {
+        pos: Vec3::new(top_left.x, top_left.y, 0.0),
+        color: Vec3::new(1.0, 1.0, 0.0),
+        uv: glam::vec2(0.0, 0.0),
+    };
+    let v1 = Vertex {
+        pos: Vec3::new(top_left.x, bottom_right.y, 0.0),
+        color: Vec3::new(1.0, 0.0, 1.0),
+        uv: glam::vec2(0.0, 1.0),
+    };
+    let v2 = Vertex {
+        pos: Vec3::new(bottom_right.x, top_left.y, 0.0),
+        color: Vec3::new(0.0, 1.0, 1.0),
+        uv: glam::vec2(1.0, 0.0),
+    };
+    let v3 = Vertex {
+        pos: Vec3::new(bottom_right.x, bottom_right.y, 0.0),
+        color: Vec3::new(0.0, 1.0, 1.0),
+        uv: glam::vec2(1.0, 1.0),
+    };
 
     let quad = Mesh {
         triangle_indices: vec![UVec3::new(0, 1, 2), UVec3::new(2, 1, 3)],
-        vertices: vec![triangle1[0], triangle1[1], triangle1[2], triangle2[2]],
+        vertices: vec![v0, v1, v2, v3],
     };
 
     let aspect_ratio = WIDTH as f32 / HEIGHT as f32;
@@ -110,7 +96,7 @@ fn main() {
         buffer.fill(0);
         z_buffer.fill(f32::INFINITY);
         let mesh_transform =
-        Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0));
+            Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0));
         let mvp = camera.projection() * camera.view() * mesh_transform.local();
         raster_mesh(
             &quad,
