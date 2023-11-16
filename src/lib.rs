@@ -7,7 +7,7 @@ pub mod transform;
 pub mod utils;
 pub use {
     camera::Camera,
-    geometry::{Mesh, Vertex},
+    geometry::*,
     texture::Texture,
     transform::{Transform, TransformInitialParams},
     utils::*,
@@ -57,43 +57,45 @@ pub fn raster_triangle(
     );
 
     let triangle_area = edge_function(sc0, sc1, sc2);
-    // iterating over the buffer
-    for (i, pixel) in buffer.iter_mut().enumerate() {
-        // +0.5 to take the center of the pixel
-        let point = Vec2::new(
-            (i as f32 + 0.5) % viewport_size.x,
-            (i as f32 + 0.5) / viewport_size.x,
-        );
-        if let Some(bary) = barycentric_coords(point, sc0, sc1, sc2, triangle_area) {
-            let correction = bary.x * rec0 + bary.y * rec1 + bary.z * rec2;
-            let correction = 1.0 / correction;
-            let depth = bary.x * ndc0.z + bary.y * ndc1.z + bary.z * ndc2.z;
-            if depth < z_buffer[i] {
-                z_buffer[i] = depth;
-                let color = bary.x * vertices[0].color
-                    + bary.y * vertices[1].color
-                    + bary.z * vertices[2].color;
-                let color = color * correction;
-                match texture {
-                    Some(texture) => {
-                        let tex_coords = bary.x * uv0 + bary.y * uv1 + bary.z * uv2;
-                        let tex_coords = tex_coords * correction;
-                        let tex_color = texture.rgb_at_uv(tex_coords.x, tex_coords.y);
-                        let r = (tex_color >> 16) as u8;
-                        let g = (tex_color >> 8) as u8;
-                        let b = tex_color as u8;
-                        *pixel = from_u8_rgb(
-                            (r as f32 * color.x) as u8,
-                            (g as f32 * color.y) as u8,
-                            (b as f32 * color.z) as u8,
-                        );
-                    }
-                    None => {
-                        *pixel = from_u8_rgb(
-                            (color.x * 255.0) as u8,
-                            (color.y * 255.0) as u8,
-                            (color.z * 255.0) as u8,
-                        );
+    // bb - bounding box of the triangle
+    if let Some(bb) = triangle_screen_bounding_box(&[sc0, sc1, sc2], viewport_size) {
+        for y in (bb.top as usize)..=bb.bottom as usize {
+            for x in (bb.left as usize)..=bb.right as usize {
+                // +0.5 to take the center of the pixel
+                let coords = glam::vec2(x as f32, y as f32) + 0.5;
+                let pixel_id = coords_to_index(x, y, viewport_size.x as usize);
+                if let Some(bary) = barycentric_coords(coords, sc0, sc1, sc2, triangle_area) {
+                    let correction = bary.x * rec0 + bary.y * rec1 + bary.z * rec2;
+                    let correction = 1.0 / correction;
+                    let depth = bary.x * ndc0.z + bary.y * ndc1.z + bary.z * ndc2.z;
+                    if depth < z_buffer[pixel_id] {
+                        z_buffer[pixel_id] = depth;
+                        let color = bary.x * vertices[0].color
+                            + bary.y * vertices[1].color
+                            + bary.z * vertices[2].color;
+                        let color = color * correction;
+                        match texture {
+                            Some(texture) => {
+                                let tex_coords = bary.x * uv0 + bary.y * uv1 + bary.z * uv2;
+                                let tex_coords = tex_coords * correction;
+                                let tex_color = texture.rgb_at_uv(tex_coords.x, tex_coords.y);
+                                let r = (tex_color >> 16) as u8;
+                                let g = (tex_color >> 8) as u8;
+                                let b = tex_color as u8;
+                                buffer[pixel_id] = from_u8_rgb(
+                                    (r as f32 * color.x) as u8,
+                                    (g as f32 * color.y) as u8,
+                                    (b as f32 * color.z) as u8,
+                                );
+                            }
+                            None => {
+                                buffer[pixel_id] = from_u8_rgb(
+                                    (color.x * 255.0) as u8,
+                                    (color.y * 255.0) as u8,
+                                    (color.z * 255.0) as u8,
+                                );
+                            }
+                        }
                     }
                 }
             }
@@ -119,5 +121,29 @@ pub fn raster_mesh(
             z_buffer,
             viewport_size,
         );
+    }
+}
+
+pub fn triangle_screen_bounding_box(
+    positions: &[Vec2; 3],
+    viewport_size: Vec2,
+) -> Option<BoundingBox2D> {
+    let bb = get_triangle_bounding_box_2d(positions);
+
+    if bb.left >= viewport_size.x || bb.right < 0.0 || bb.bottom >= viewport_size.y || bb.top < 0.0
+    {
+        None
+    } else {
+        let left = bb.left.max(0.0);
+        let right = bb.right.min(viewport_size.x - 1.0);
+        let bottom = bb.bottom.max(0.0);
+        let top = bb.top.min(viewport_size.y - 1.0);
+
+        Some(BoundingBox2D {
+            left,
+            right,
+            top,
+            bottom,
+        })
     }
 }
