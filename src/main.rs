@@ -52,27 +52,27 @@ fn main() {
     let texture = Texture::load(Path::new("assets/giorno_stare_1024.jpg"));
     let window_size = glam::vec2(WIDTH as f32, HEIGHT as f32);
 
-    let side: f32 = 1.0;
-    let top_left = Vec2::new(-0.5, -0.5);
+    let side: f32 = 2.0;
+    let top_left = Vec2::new(-1.0, -1.0);
     let bottom_right = top_left + side;
 
     let v0 = Vertex {
-        pos: Vec3::new(top_left.x, top_left.y, 0.0),
+        pos: Vec3::new(top_left.x, top_left.y, 1.0),
         color: Vec3::new(1.0, 1.0, 0.0),
         uv: glam::vec2(0.0, 0.0),
     };
     let v1 = Vertex {
-        pos: Vec3::new(top_left.x, bottom_right.y, 0.0),
+        pos: Vec3::new(top_left.x, bottom_right.y, 1.0),
         color: Vec3::new(1.0, 0.0, 1.0),
         uv: glam::vec2(0.0, 1.0),
     };
     let v2 = Vertex {
-        pos: Vec3::new(bottom_right.x, top_left.y, 0.0),
+        pos: Vec3::new(bottom_right.x, top_left.y, 1.0),
         color: Vec3::new(0.0, 1.0, 1.0),
         uv: glam::vec2(1.0, 0.0),
     };
     let v3 = Vertex {
-        pos: Vec3::new(bottom_right.x, bottom_right.y, 0.0),
+        pos: Vec3::new(bottom_right.x, bottom_right.y, 1.0),
         color: Vec3::new(0.0, 1.0, 1.0),
         uv: glam::vec2(1.0, 1.0),
     };
@@ -82,10 +82,49 @@ fn main() {
         vertices: vec![v0, v1, v2, v3],
     };
 
+    let transforms = [
+        Transform::IDENTITY,
+        //-z
+        Transform::from_rotation(glam::Quat::from_euler(
+            glam::EulerRot::XYZ,
+            -std::f32::consts::PI,
+            0.0,
+            0.0,
+        )),
+        //+y
+        Transform::from_rotation(glam::Quat::from_euler(
+            glam::EulerRot::XYZ,
+            std::f32::consts::FRAC_PI_2,
+            0.0,
+            0.0,
+        )),
+        //-y
+        Transform::from_rotation(glam::Quat::from_euler(
+            glam::EulerRot::XYZ,
+            -std::f32::consts::FRAC_PI_2,
+            0.0,
+            0.0,
+        )),
+        //+x
+        Transform::from_rotation(glam::Quat::from_euler(
+            glam::EulerRot::XYZ,
+            0.0,
+            -std::f32::consts::FRAC_PI_2,
+            0.0,
+        )),
+        //-x
+        Transform::from_rotation(glam::Quat::from_euler(
+            glam::EulerRot::XYZ,
+            0.0,
+            std::f32::consts::FRAC_PI_2,
+            0.0,
+        )),
+    ];
+
     let aspect_ratio = WIDTH as f32 / HEIGHT as f32;
     let mut camera = Camera {
         aspect_ratio,
-        transform: Transform::from_translation(glam::vec3(0.0, 0.0, 1.5)),
+        transform: Transform::from_translation(glam::vec3(0.0, 0.0, 2.0)),
         frustum_far: 100.0,
         ..Default::default()
     };
@@ -95,17 +134,20 @@ fn main() {
         input_handling(&window, &mut camera);
         buffer.fill(0);
         z_buffer.fill(f32::INFINITY);
-        let mesh_transform =
-            Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0));
-        let mvp = camera.projection() * camera.view() * mesh_transform.local();
-        raster_mesh(
-            &quad,
-            &mvp,
-            &texture,
-            &mut buffer,
-            &mut z_buffer,
-            window_size,
-        );
+        let parent_local =
+            Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0))
+                .local();
+        let mvp = camera.projection() * camera.view() * parent_local;
+        for transform in transforms {
+            raster_mesh(
+                &quad,
+                &(mvp * transform.local()),
+                &texture,
+                &mut buffer,
+                &mut z_buffer,
+                window_size,
+            );
+        }
         rot += 0.05;
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
