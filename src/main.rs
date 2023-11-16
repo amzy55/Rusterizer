@@ -1,4 +1,4 @@
-use glam::{UVec3, Vec2, Vec3};
+use glam::{UVec3, Vec2, Vec3, Vec4};
 use minifb::{Key, Window, WindowOptions};
 use std::path::Path;
 
@@ -57,23 +57,23 @@ fn main() {
     let bottom_right = top_left + side;
 
     let v0 = Vertex {
-        pos: Vec3::new(top_left.x, top_left.y, 1.0),
-        color: Vec3::new(1.0, 1.0, 0.0),
+        pos: Vec4::new(top_left.x, top_left.y, 1.0, 1.0),
+        color: Vec3::new(1.0, 1.0, 1.0),
         uv: glam::vec2(0.0, 0.0),
     };
     let v1 = Vertex {
-        pos: Vec3::new(top_left.x, bottom_right.y, 1.0),
-        color: Vec3::new(1.0, 0.0, 1.0),
+        pos: Vec4::new(top_left.x, bottom_right.y, 1.0, 1.0),
+        color: Vec3::new(1.0, 1.0, 1.0),
         uv: glam::vec2(0.0, 1.0),
     };
     let v2 = Vertex {
-        pos: Vec3::new(bottom_right.x, top_left.y, 1.0),
-        color: Vec3::new(0.0, 1.0, 1.0),
+        pos: Vec4::new(bottom_right.x, top_left.y, 1.0, 1.0),
+        color: Vec3::new(1.0, 1.0, 1.0),
         uv: glam::vec2(1.0, 0.0),
     };
     let v3 = Vertex {
-        pos: Vec3::new(bottom_right.x, bottom_right.y, 1.0),
-        color: Vec3::new(0.0, 1.0, 1.0),
+        pos: Vec4::new(bottom_right.x, bottom_right.y, 1.0, 1.0),
+        color: Vec3::new(1.0, 1.0, 1.0),
         uv: glam::vec2(1.0, 1.0),
     };
 
@@ -125,6 +125,7 @@ fn main() {
     let mut camera = Camera {
         aspect_ratio,
         transform: Transform::from_translation(glam::vec3(0.0, 0.0, 2.0)),
+        frustum_near: 5.0,
         frustum_far: 100.0,
         ..Default::default()
     };

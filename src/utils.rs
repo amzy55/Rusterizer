@@ -58,3 +58,13 @@ where
 {
     b1 + (v - a1) * (b2 - b1) / (a2 - a1)
 }
+
+pub fn lerp<T>(start: T, end: T, alpha: f32) -> T
+where
+    T: std::ops::Sub<Output = T>
+        + std::ops::Mul<f32, Output = T>
+        + std::ops::Add<Output = T>
+        + Copy,
+{
+    start + (end - start) * alpha
+}
