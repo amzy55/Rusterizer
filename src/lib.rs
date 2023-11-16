@@ -15,19 +15,15 @@ pub use {
 
 pub fn raster_triangle(
     vertices: &[Vertex; 3],
-    model: &Mat4,
-    view: &Mat4,
-    projection: &Mat4,
+    mvp: &Mat4,
     texture: Option<&Texture>,
     buffer: &mut Vec<u32>,
     z_buffer: &mut Vec<f32>,
     viewport_size: Vec2,
 ) {
-    let mvp = *projection * *view * *model;
-
-    let clip0 = mvp * Vec4::from((vertices[0].pos, 1.0));
-    let clip1 = mvp * Vec4::from((vertices[1].pos, 1.0));
-    let clip2 = mvp * Vec4::from((vertices[2].pos, 1.0));
+    let clip0 = *mvp * Vec4::from((vertices[0].pos, 1.0));
+    let clip1 = *mvp * Vec4::from((vertices[1].pos, 1.0));
+    let clip2 = *mvp * Vec4::from((vertices[2].pos, 1.0));
 
     let rec0 = 1.0 / clip0.w;
     let rec1 = 1.0 / clip1.w;
@@ -107,9 +103,7 @@ pub fn raster_triangle(
 
 pub fn raster_mesh(
     mesh: &Mesh,
-    model: &Mat4,
-    view: &Mat4,
-    projection: &Mat4,
+    mvp: &Mat4,
     texture: &Texture,
     buffer: &mut Vec<u32>,
     z_buffer: &mut Vec<f32>,
@@ -119,9 +113,7 @@ pub fn raster_mesh(
         let vertices = mesh.get_vertices_from_triangle_indices(*triangle_indices);
         raster_triangle(
             &vertices,
-            model,
-            view,
-            projection,
+            mvp,
             Some(texture),
             buffer,
             z_buffer,

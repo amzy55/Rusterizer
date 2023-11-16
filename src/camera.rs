@@ -19,7 +19,7 @@ impl Default for Camera {
             fov: std::f32::consts::PI / 4.0,
             aspect_ratio: 1.0,
             transform: Transform::IDENTITY,
-            speed: 1.0,
+            speed: 0.5,
         }
     }
 }

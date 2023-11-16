@@ -7,28 +7,36 @@ use rusterizer::*;
 const WIDTH: usize = 640;
 const HEIGHT: usize = 360;
 
-// fn input_handling(window: &Window, offset: &mut Vec2) {
-//     let move_by: f32 = 5.0;
-//     if window.is_key_down(Key::A) {
-//         offset.x -= move_by;
-//     }
-//     if window.is_key_down(Key::D) {
-//         offset.x += move_by;
-//     }
-//     if window.is_key_down(Key::W) {
-//         offset.y -= move_by;
-//     }
-//     if window.is_key_down(Key::S) {
-//         offset.y += move_by;
-//     }
-// }
+fn input_handling(window: &Window, camera: &mut Camera) {
+    let mut axis = Vec3::new(0.0, 0.0, 0.0);
+    if window.is_key_down(Key::A) {
+        axis.x -= 1.0;
+    }
+    if window.is_key_down(Key::D) {
+        axis.x += 1.0;
+    }
+    if window.is_key_down(Key::W) {
+        axis.y += 1.0;
+    }
+    if window.is_key_down(Key::S) {
+        axis.y -= 1.0;
+    }
+    if window.is_key_down(Key::Q) {
+        axis.z -= 1.0;
+    }
+    if window.is_key_down(Key::E) {
+        axis.z += 1.0;
+    }
+    camera.transform.translation += camera.transform.right() * camera.speed * axis.x
+    + camera.transform.forward() * camera.speed * axis.y + camera.transform.up() * camera.speed * axis.z;
+}
 
 fn main() {
     let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
     let mut z_buffer = vec![f32::INFINITY; WIDTH * HEIGHT];
 
     let mut window = Window::new(
-        "Test - ESC to exit",
+        "Rusterizer - ESC to exit",
         WIDTH,
         HEIGHT,
         WindowOptions::default(),
@@ -89,7 +97,7 @@ fn main() {
     };
 
     let aspect_ratio = WIDTH as f32 / HEIGHT as f32;
-    let camera = Camera {
+    let mut camera = Camera {
         aspect_ratio,
         transform: Transform::from_translation(glam::vec3(0.0, 0.0, 1.5)),
         frustum_far: 100.0,
@@ -98,16 +106,15 @@ fn main() {
 
     let mut rot = 0.0;
     while window.is_open() && !window.is_key_down(Key::Escape) {
-        // input_handling(&window, &mut offset);
+        input_handling(&window, &mut camera);
         buffer.fill(0);
         z_buffer.fill(f32::INFINITY);
-        let transform =
+        let mesh_transform =
         Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0));
+        let mvp = camera.projection() * camera.view() * mesh_transform.local();
         raster_mesh(
             &quad,
-            &transform.local(),
-            &camera.view(),
-            &camera.projection(),
+            &mvp,
             &texture,
             &mut buffer,
             &mut z_buffer,
