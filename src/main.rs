@@ -7,7 +7,7 @@ use rusterizer::*;
 const WIDTH: usize = 640;
 const HEIGHT: usize = 360;
 
-fn input_handling(window: &Window, camera: &mut Camera) {
+fn input_handling(dt: f32, window: &Window, camera: &mut Camera) {
     let mut axis = Vec3::new(0.0, 0.0, 0.0);
     if window.is_key_down(Key::A) {
         axis.x -= 1.0;
@@ -27,6 +27,7 @@ fn input_handling(window: &Window, camera: &mut Camera) {
     if window.is_key_down(Key::E) {
         axis.z += 1.0;
     }
+    axis *= dt;
     camera.transform.translation += camera.transform.right() * camera.speed * axis.x
         + camera.transform.forward() * camera.speed * axis.y
         + camera.transform.up() * camera.speed * axis.z;
@@ -47,7 +48,7 @@ fn main() {
     });
 
     // Limit to max ~60 fps update rate
-    window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
+    // window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
     let texture = Texture::load(Path::new("assets/giorno_stare_1024.jpg"));
     let window_size = glam::vec2(WIDTH as f32, HEIGHT as f32);
@@ -131,8 +132,24 @@ fn main() {
     };
 
     let mut rot = 0.0;
+
+    let now = std::time::Instant::now();
+    let mut start_time = now.elapsed().as_secs_f32();
+    let mut fps_timer = 0.0;
+    let mut frames = 0;
+
     while window.is_open() && !window.is_key_down(Key::Escape) {
-        input_handling(&window, &mut camera);
+        let end_time = now.elapsed().as_secs_f32();
+        let dt = end_time - start_time;
+        fps_timer += dt;
+        frames += 1;
+        if fps_timer > 1.0 {
+            println!("{}", frames);
+            frames = 0;
+            fps_timer = 0.0;
+        }
+
+        input_handling(dt, &window, &mut camera);
         buffer.fill(0);
         z_buffer.fill(f32::INFINITY);
         let parent_local =
@@ -149,7 +166,9 @@ fn main() {
                 window_size,
             );
         }
-        rot += 0.05;
+
+        rot += 2.0 * dt as f32;
+        start_time = end_time;
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
 }

@@ -62,13 +62,12 @@ pub fn raster_clipped_triangle(
                     let depth = bary.x * ndc0.z + bary.y * ndc1.z + bary.z * ndc2.z;
                     if depth < z_buffer[pixel_id] {
                         z_buffer[pixel_id] = depth;
-                        let color = bary.x * pv0.color
-                            + bary.y * pv1.color
-                            + bary.z * pv2.color;
+                        let color = bary.x * pv0.color + bary.y * pv1.color + bary.z * pv2.color;
                         let color = color * correction;
                         match texture {
                             Some(texture) => {
-                                let tex_coords = bary.x * pv0.uv + bary.y * pv1.uv + bary.z * pv2.uv;
+                                let tex_coords =
+                                    bary.x * pv0.uv + bary.y * pv1.uv + bary.z * pv2.uv;
                                 let tex_coords = tex_coords * correction;
                                 let tex_color = texture.rgb_at_uv(tex_coords.x, tex_coords.y);
                                 let r = (tex_color >> 16) as u8;
@@ -261,7 +260,6 @@ pub fn clip_triangle_one(triangle: &Triangle) -> Triangle {
     v1.color = red;
     v2.color = red;
 
-    //println!("out tri: {:?}, {:?}, {:?},", v0, v1, v2);
     // draw triangles
     Triangle { v0, v1, v2 }
 }
