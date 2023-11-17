@@ -36,11 +36,12 @@ impl Texture {
 
     pub fn rgb_at_uv(&self, u: f32, v: f32) -> u32 {
         let (u, v) = (u * self.width as f32, v * self.height as f32);
+        let (u, v) = (u as usize % self.width, v as usize % self.height);
         let id = u as usize + v as usize * self.width;
         if id < self.data.len() {
             self.data[id]
         } else {
-            from_u8_rgb(255, 0, 255)
+            from_u8_rgb(0, 255, 255)
         }
     }
 }

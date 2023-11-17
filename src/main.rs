@@ -50,8 +50,8 @@ fn main() {
     // Limit to max ~60 fps update rate
     // window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
-    let _texture = Texture::load(Path::new("assets/textures/giorno_stare_1024.jpg"));
-    let model = load_gltf(Path::new("assets/gltf_models/teapot.gltf"));
+    let texture = Texture::load(Path::new("assets/gltf_models/damaged_helmet/Default_albedo.jpg"));
+    let model = load_gltf(Path::new("assets/gltf_models/damaged_helmet/DamagedHelmet.gltf"));
     let window_size = glam::vec2(WIDTH as f32, HEIGHT as f32);
 
     let side: f32 = 2.0;
@@ -131,7 +131,7 @@ fn main() {
     let mut camera = Camera {
         aspect_ratio,
         transform: Transform::from_translation(glam::vec3(0.0, 0.0, 5.0)),
-        frustum_near: 5.0,
+        frustum_near: 2.0,
         frustum_far: 100.0,
         ..Default::default()
     };
@@ -173,7 +173,7 @@ fn main() {
             &model,
             &(mvp),
             &parent_local,
-            None,
+            Some(&texture),
             &mut buffer,
             &mut z_buffer,
             window_size,

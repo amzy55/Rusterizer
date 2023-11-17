@@ -313,8 +313,8 @@ pub fn clip_cull_triangle(triangle: &Triangle) -> ClipResult {
 // don't fully understand this function
 // but I know it's checking to see if the triangle is (somewhat) facing the camera
 pub fn cull_triangle_backface(triangle: &Triangle) -> bool {
-    let normal = (triangle.v1.pos.xyz() - triangle.v0.pos.xyz())
-        .cross(triangle.v2.pos.xyz() - triangle.v0.pos.xyz());
+    let normal = (triangle.v1.pos.xyz() - triangle.v1.pos.w )
+        .cross(triangle.v2.pos.xyz() - triangle.v0.pos.xyz()); // should be divided by w?
     // any is vertex valid
     let view_dir = -Vec3::Z;
     // also we don't care about normalizing
