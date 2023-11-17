@@ -11,7 +11,12 @@ pub struct Vertex {
 
 impl Vertex {
     pub fn new(pos: Vec4, normal: Vec3, color: Vec3, uv: Vec2) -> Self {
-        Self { pos, normal, color, uv }
+        Self {
+            pos,
+            normal,
+            color,
+            uv,
+        }
     }
 }
 

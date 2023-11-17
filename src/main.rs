@@ -50,8 +50,12 @@ fn main() {
     // Limit to max ~60 fps update rate
     // window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
-    let texture = Texture::load(Path::new("assets/gltf_models/damaged_helmet/Default_albedo.jpg"));
-    let model = load_gltf(Path::new("assets/gltf_models/damaged_helmet/DamagedHelmet.gltf"));
+    let texture = Texture::load(Path::new(
+        "assets/textures/bee_icon_256.png",
+    ));
+    let model = load_gltf(Path::new(
+        "assets/gltf_models/damaged_helmet/DamagedHelmet.gltf",
+    ));
     let window_size = glam::vec2(WIDTH as f32, HEIGHT as f32);
 
     let side: f32 = 2.0;
@@ -60,25 +64,25 @@ fn main() {
 
     let v0 = Vertex {
         pos: Vec4::new(top_left.x, top_left.y, 1.0, 1.0),
-        normal: Vec3::new(0.0, 0.0, 1.0), 
+        normal: Vec3::new(0.0, 0.0, 1.0),
         color: Vec3::new(1.0, 1.0, 1.0),
         uv: glam::vec2(0.0, 0.0),
     };
     let v1 = Vertex {
         pos: Vec4::new(top_left.x, bottom_right.y, 1.0, 1.0),
-        normal: Vec3::new(0.0, 0.0, 1.0), 
+        normal: Vec3::new(0.0, 0.0, 1.0),
         color: Vec3::new(1.0, 1.0, 1.0),
         uv: glam::vec2(0.0, 1.0),
     };
     let v2 = Vertex {
         pos: Vec4::new(bottom_right.x, top_left.y, 1.0, 1.0),
-        normal: Vec3::new(0.0, 0.0, 1.0), 
+        normal: Vec3::new(0.0, 0.0, 1.0),
         color: Vec3::new(1.0, 1.0, 1.0),
         uv: glam::vec2(1.0, 0.0),
     };
     let v3 = Vertex {
         pos: Vec4::new(bottom_right.x, bottom_right.y, 1.0, 1.0),
-        normal: Vec3::new(0.0, 0.0, 1.0), 
+        normal: Vec3::new(0.0, 0.0, 1.0),
         color: Vec3::new(1.0, 1.0, 1.0),
         uv: glam::vec2(1.0, 1.0),
     };
