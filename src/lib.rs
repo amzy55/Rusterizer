@@ -99,17 +99,23 @@ pub fn raster_clipped_triangle(
 pub fn raster_triangle(
     vertices: &[Vertex; 3],
     mvp: &Mat4,
+    model_matrix: &Mat4,
     texture: Option<&Texture>,
     buffer: &mut Vec<u32>,
     z_buffer: &mut Vec<f32>,
     viewport_size: Vec2,
 ) {
+    let trans_inv = glam::Mat4::transpose(&glam::Mat4::inverse(model_matrix));
+
     let triangle = Triangle {
         v0: vertices[0],
         v1: vertices[1],
         v2: vertices[2],
     };
-    let clip_tri = triangle.transform(mvp);
+    let mut clip_tri = triangle.transform(mvp);
+    clip_tri.v0.normal = (trans_inv * clip_tri.v0.normal.extend(0.0)).xyz();
+    clip_tri.v1.normal = (trans_inv * clip_tri.v1.normal.extend(0.0)).xyz();
+    clip_tri.v2.normal = (trans_inv * clip_tri.v2.normal.extend(0.0)).xyz();
 
     match clip_cull_triangle(&clip_tri) {
         ClipResult::None => {}
@@ -125,6 +131,7 @@ pub fn raster_triangle(
 
 pub fn raster_mesh(
     mesh: &Mesh,
+    model_matrix: &Mat4,
     mvp: &Mat4,
     texture: Option<&Texture>,
     buffer: &mut Vec<u32>,
@@ -135,6 +142,7 @@ pub fn raster_mesh(
         let vertices = mesh.get_vertices_from_triangle_indices(*triangle_indices);
         raster_triangle(
             &vertices,
+            model_matrix,
             mvp,
             texture,
             buffer,

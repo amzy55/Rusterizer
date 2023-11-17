@@ -171,7 +171,8 @@ fn main() {
 
         raster_mesh(
             &model,
-            &(mvp * parent_local),
+            &(mvp),
+            &parent_local,
             None,
             &mut buffer,
             &mut z_buffer,
