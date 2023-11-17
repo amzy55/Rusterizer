@@ -64,8 +64,12 @@ pub fn raster_clipped_triangle(
                     let depth = bary.x * ndc0.z + bary.y * ndc1.z + bary.z * ndc2.z;
                     if depth < z_buffer[pixel_id] {
                         z_buffer[pixel_id] = depth;
-                        let color = bary.x * pv0.normal + bary.y * pv1.normal + bary.z * pv2.normal;
+                        let normal = bary.x * pv0.normal + bary.y * pv1.normal + bary.z * pv2.normal;
+                        let normal = normal * correction;
+                        let n_dot_l = normal.dot(Vec3::ONE.normalize()); // fixed amount of light
+                        let color = bary.x * pv0.color + bary.y * pv1.color + bary.z * pv2.color;
                         let color = color * correction;
+                        let color = color * n_dot_l;
                         match texture {
                             Some(texture) => {
                                 let tex_coords =
