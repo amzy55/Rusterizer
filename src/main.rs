@@ -136,16 +136,13 @@ fn main() {
     let now = std::time::Instant::now();
     let mut start_time = now.elapsed().as_secs_f32();
     let mut fps_timer = 0.0;
-    let mut frames = 0;
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let end_time = now.elapsed().as_secs_f32();
         let dt = end_time - start_time;
         fps_timer += dt;
-        frames += 1;
         if fps_timer > 1.0 {
-            println!("{}", frames);
-            frames = 0;
+            println!("{}", (fps_timer / dt) as u32);
             fps_timer = 0.0;
         }
 

@@ -28,20 +28,19 @@ pub fn barycentric_coords(
     v2: Vec2,
     triangle_area: f32,
 ) -> Option<Vec3> {
-    // w - weight
-    let w0 = edge_function(point, v1, v2);
-    let w1 = edge_function(point, v2, v0);
-    let w2 = edge_function(point, v0, v1);
-
     // 1 division instead of 3
     let reverse_area = 1.0 / triangle_area;
 
+    // w - weight
+    let w0 = edge_function(point, v1, v2) * reverse_area;
+    let w1 = edge_function(point, v2, v0) * reverse_area;
+    let w2 = 1.0 - w0 - w1; // no need t do a third edge function because w0 + w1 + w2 = 1.0
+
     if (w0 <= 0.0 && w1 <= 0.0 && w2 <= 0.0) || (w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0) {
-        // Vec3::new(w0 * reverse_area, w1 * reverse_area, w2 * reverse_area)
         Some(Vec3 {
-            x: w0 * reverse_area,
-            y: w1 * reverse_area,
-            z: w2 * reverse_area,
+            x: w0,
+            y: w1,
+            z: w2,
         })
     } else {
         None
