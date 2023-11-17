@@ -64,7 +64,7 @@ pub fn raster_clipped_triangle(
                     let depth = bary.x * ndc0.z + bary.y * ndc1.z + bary.z * ndc2.z;
                     if depth < z_buffer[pixel_id] {
                         z_buffer[pixel_id] = depth;
-                        let color = bary.x * pv0.color + bary.y * pv1.color + bary.z * pv2.color;
+                        let color = bary.x * pv0.normal + bary.y * pv1.normal + bary.z * pv2.normal;
                         let color = color * correction;
                         match texture {
                             Some(texture) => {
@@ -126,7 +126,7 @@ pub fn raster_triangle(
 pub fn raster_mesh(
     mesh: &Mesh,
     mvp: &Mat4,
-    texture: &Texture,
+    texture: Option<&Texture>,
     buffer: &mut Vec<u32>,
     z_buffer: &mut Vec<f32>,
     viewport_size: Vec2,
@@ -136,7 +136,7 @@ pub fn raster_mesh(
         raster_triangle(
             &vertices,
             mvp,
-            Some(texture),
+            texture,
             buffer,
             z_buffer,
             viewport_size,

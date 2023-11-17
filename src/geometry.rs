@@ -4,13 +4,14 @@ use std::ops::{Add, Mul, MulAssign, Sub};
 #[derive(Debug, Copy, Clone)]
 pub struct Vertex {
     pub pos: Vec4,
+    pub normal: Vec3,
     pub color: Vec3,
     pub uv: Vec2,
 }
 
 impl Vertex {
-    pub fn new(pos: Vec4, color: Vec3, uv: Vec2) -> Self {
-        Self { pos, color, uv }
+    pub fn new(pos: Vec4, normal: Vec3, color: Vec3, uv: Vec2) -> Self {
+        Self { pos, normal, color, uv }
     }
 }
 
@@ -19,10 +20,11 @@ impl Add for Vertex {
 
     fn add(self, right: Self) -> Self {
         let pos = self.pos + right.pos;
+        let normal = self.normal + right.normal;
         let color = self.color + right.color;
         let uv = self.uv + right.uv;
 
-        Self::new(pos, color, uv)
+        Self::new(pos, normal, color, uv)
     }
 }
 
@@ -31,10 +33,11 @@ impl Sub for Vertex {
 
     fn sub(self, right: Self) -> Self {
         let pos = self.pos - right.pos;
+        let normal = self.normal - right.normal;
         let color = self.color - right.color;
         let uv = self.uv - right.uv;
 
-        Self::new(pos, color, uv)
+        Self::new(pos, normal, color, uv)
     }
 }
 
@@ -43,10 +46,11 @@ impl Mul for Vertex {
 
     fn mul(self, right: Self) -> Self {
         let pos = self.pos * right.pos;
+        let normal = self.normal * right.normal;
         let color = self.color * right.color;
         let uv = self.uv * right.uv;
 
-        Self::new(pos, color, uv)
+        Self::new(pos, normal, color, uv)
     }
 }
 
@@ -55,9 +59,10 @@ impl Mul<f32> for Vertex {
 
     fn mul(self, rhs: f32) -> Self {
         let pos = self.pos * rhs;
+        let normal = self.normal * rhs;
         let color = self.color * rhs;
         let uv = self.uv * rhs;
-        Self::new(pos, color, uv)
+        Self::new(pos, normal, color, uv)
     }
 }
 
@@ -133,6 +138,7 @@ impl Mesh {
         &mut self,
         triangles: &[UVec3],
         positions: &[Vec3],
+        normals: &[Vec3],
         colors: &[Vec3],
         uvs: &[Vec2],
     ) {
@@ -144,6 +150,7 @@ impl Mesh {
         for i in 0..positions.len() {
             let vertex = Vertex::new(
                 positions[i].extend(1.0),
+                normals[i],
                 if has_colors { colors[i] } else { Vec3::ONE },
                 if has_uvs { uvs[i] } else { Vec2::ZERO },
             );
@@ -153,6 +160,7 @@ impl Mesh {
 
     pub fn load_from_gltf(mesh: &gltf::Mesh, buffers: &[gltf::buffer::Data]) -> Mesh {
         let mut positions: Vec<Vec3> = Vec::new();
+        let mut normals: Vec<Vec3> = Vec::new();
         let mut tex_coords: Vec<Vec2> = Vec::new();
         let mut indices = vec![];
         // TODO: handle errors
@@ -164,6 +172,9 @@ impl Mesh {
             }
             if let Some(positions_reader) = reader.read_positions() {
                 positions_reader.for_each(|p| positions.push(Vec3::new(p[0], p[1], p[2])));
+            }
+            if let Some(normals_reader) = reader.read_normals() {
+                normals_reader.for_each(|n| normals.push(Vec3::new(n[0], n[1], n[2])));
             }
             if let Some(tex_coord_reader) = reader.read_tex_coords(0) {
                 tex_coord_reader
@@ -180,7 +191,7 @@ impl Mesh {
                 .chunks_exact(3)
                 .map(|tri| UVec3::new(tri[0], tri[1], tri[2]))
                 .collect();
-            result.add_section_from_buffers(&triangles, &positions, &colors, &tex_coords)
+            result.add_section_from_buffers(&triangles, &positions, &normals, &colors, &tex_coords)
         }
         result
     }
