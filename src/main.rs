@@ -3,6 +3,8 @@ use minifb::{Key, Window, WindowOptions};
 use std::path::Path;
 
 use rusterizer::*;
+pub mod font;
+pub use font::Font;
 
 const WIDTH: usize = 640;
 const HEIGHT: usize = 360;
@@ -34,7 +36,8 @@ fn input_handling(dt: f32, window: &Window, camera: &mut Camera) {
 }
 
 fn main() {
-    let mut buffer: Vec<u32> = vec![0; WIDTH * HEIGHT];
+    let grey = from_u8_rgb(100, 100, 100);
+    let mut buffer: Vec<u32> = vec![grey; WIDTH * HEIGHT];
     let mut z_buffer = vec![f32::INFINITY; WIDTH * HEIGHT];
 
     let mut window = Window::new(
@@ -50,9 +53,7 @@ fn main() {
     // Limit to max ~60 fps update rate
     // window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
-    let texture = Texture::load(Path::new(
-        "assets/textures/bee_icon_256.png",
-    ));
+    let texture = Texture::load(Path::new("assets/textures/bee_icon_256.png"));
     let model = load_gltf(Path::new(
         "assets/gltf_models/damaged_helmet/DamagedHelmet.gltf",
     ));
@@ -135,10 +136,13 @@ fn main() {
     let mut camera = Camera {
         aspect_ratio,
         transform: Transform::from_translation(glam::vec3(0.0, 0.0, 5.0)),
-        frustum_near: 2.0,
+        frustum_near: 0.5,
         frustum_far: 100.0,
         ..Default::default()
     };
+
+    // has to be mutable because of how it's implemented
+    let mut font = Font::default();
 
     let mut rot = 0.0;
 
@@ -156,7 +160,7 @@ fn main() {
         }
 
         input_handling(dt, &window, &mut camera);
-        buffer.fill(0);
+        buffer.fill(grey);
         z_buffer.fill(f32::INFINITY);
         let parent_local =
             Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0))
@@ -173,15 +177,20 @@ fn main() {
         //     );
         // }
 
-        raster_mesh(
-            &model,
-            &(mvp),
-            &parent_local,
-            Some(&texture),
-            &mut buffer,
-            &mut z_buffer,
-            window_size,
-        );
+        // raster_mesh(
+        //     &model,
+        //     &(mvp),
+        //     &parent_local,
+        //     Some(&texture),
+        //     &mut buffer,
+        //     &mut z_buffer,
+        //     window_size,
+        // );
+
+        let _text_mvp = camera.projection() * camera.view() * glam::Mat4::IDENTITY;
+        font.text("text!./ ".to_string(), Vec2{ x: -0.5, y: -0.5});
+        font.text("*i can type stuff*".to_string(), Vec2{ x: -0.5, y: -0.25});
+        font.render(&mut buffer, &mut z_buffer, &mvp, window_size);
 
         rot += 0.5 * dt as f32;
         start_time = end_time;

@@ -54,7 +54,7 @@ impl Texture {
         if id < self.data.len() {
             self.data[id]
         } else {
-            from_u8_rgb(0, 255, 255)
+            from_u8_rgb(255, 0, 255)
         }
     }
 }

@@ -71,7 +71,6 @@ pub fn raster_clipped_triangle(
                         let ambient = glam::vec3(0.3, 0.3, 0.3); // fixed amount of ambient light
                         let color = bary.x * pv0.color + bary.y * pv1.color + bary.z * pv2.color;
                         let color = color * correction * n_dot_l + ambient;
-                        let color = color;
                         match texture {
                             Some(texture) => {
                                 let tex_coords =
@@ -352,4 +351,146 @@ pub fn load_gltf(path: &Path) -> Mesh {
     }
 
     Mesh::new()
+}
+
+pub fn raster_clipped_triangle_for_text(
+    triangle: &Triangle,
+    texture: Option<&Texture>,
+    buffer: &mut Vec<u32>,
+    z_buffer: &mut Vec<f32>,
+    viewport_size: Vec2,
+) {
+    let rec0 = 1.0 / triangle.v0.pos.w;
+    let rec1 = 1.0 / triangle.v1.pos.w;
+    let rec2 = 1.0 / triangle.v2.pos.w;
+
+    // normalized device coordinates -> between -1 and 1
+    let ndc0 = triangle.v0.pos * rec0;
+    let ndc1 = triangle.v1.pos * rec1;
+    let ndc2 = triangle.v2.pos * rec2;
+
+    // perspective division on all attributes
+    let pv0 = triangle.v0 * rec0;
+    let pv1 = triangle.v1 * rec1;
+    let pv2 = triangle.v2 * rec2;
+
+    // screen coordinates remapped to window
+    let sc0 = glam::vec2(
+        map_to_range(ndc0.x, -1.0, 1.0, 0.0, viewport_size.x),
+        map_to_range(ndc0.y, -1.0, 1.0, 0.0, viewport_size.y),
+    );
+    let sc1 = glam::vec2(
+        map_to_range(ndc1.x, -1.0, 1.0, 0.0, viewport_size.x),
+        map_to_range(ndc1.y, -1.0, 1.0, 0.0, viewport_size.y),
+    );
+    let sc2 = glam::vec2(
+        map_to_range(ndc2.x, -1.0, 1.0, 0.0, viewport_size.x),
+        map_to_range(ndc2.y, -1.0, 1.0, 0.0, viewport_size.y),
+    );
+
+    let triangle_area = edge_function(sc0, sc1, sc2);
+    // bb - bounding box of the triangle
+    if let Some(bb) = triangle_screen_bounding_box(&[sc0, sc1, sc2], viewport_size) {
+        for y in (bb.top as usize)..=bb.bottom as usize {
+            for x in (bb.left as usize)..=bb.right as usize {
+                // +0.5 to take the center of the pixel
+                let coords = glam::vec2(x as f32, y as f32) + 0.5;
+                let pixel_id = coords_to_index(x, y, viewport_size.x as usize);
+                if let Some(bary) = barycentric_coords(coords, sc0, sc1, sc2, triangle_area) {
+                    let correction = bary.x * rec0 + bary.y * rec1 + bary.z * rec2;
+                    let correction = 1.0 / correction;
+                    let depth = bary.x * ndc0.z + bary.y * ndc1.z + bary.z * ndc2.z;
+                    if depth < z_buffer[pixel_id] {
+                        z_buffer[pixel_id] = depth;
+                        let normal =
+                            bary.x * pv0.normal + bary.y * pv1.normal + bary.z * pv2.normal;
+                        let normal = normal * correction;
+                        let color = bary.x * pv0.color + bary.y * pv1.color + bary.z * pv2.color;
+                        let color = color * correction;
+                        match texture {
+                            Some(texture) => {
+                                let tex_coords =
+                                    bary.x * pv0.uv + bary.y * pv1.uv + bary.z * pv2.uv;
+                                let tex_coords = tex_coords * correction;
+                                let tex_color = texture.rgb_at_uv(tex_coords.x, tex_coords.y);
+                                let a = (tex_color >> 24) as u8;
+                                let r = (tex_color >> 16) as u8;
+                                let g = (tex_color >> 8) as u8;
+                                let b = tex_color as u8;
+                                buffer[pixel_id] = from_u8_argb(
+                                    a,
+                                    (r as f32 * color.x) as u8,
+                                    (g as f32 * color.y) as u8,
+                                    (b as f32 * color.z) as u8,
+                                );
+                            }
+                            None => {
+                                buffer[pixel_id] = from_u8_rgb(
+                                    (color.x * 255.0) as u8,
+                                    (color.y * 255.0) as u8,
+                                    (color.z * 255.0) as u8,
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn raster_triangle_for_text(
+    vertices: &[Vertex; 3],
+    mvp: &Mat4,
+    model_matrix: &Mat4,
+    texture: Option<&Texture>,
+    buffer: &mut Vec<u32>,
+    z_buffer: &mut Vec<f32>,
+    viewport_size: Vec2,
+) {
+    let trans_inv = glam::Mat4::transpose(&glam::Mat4::inverse(model_matrix));
+
+    let triangle = Triangle {
+        v0: vertices[0],
+        v1: vertices[1],
+        v2: vertices[2],
+    };
+    let mut clip_tri = triangle.transform(mvp);
+    clip_tri.v0.normal = (trans_inv * clip_tri.v0.normal.extend(0.0)).xyz();
+    clip_tri.v1.normal = (trans_inv * clip_tri.v1.normal.extend(0.0)).xyz();
+    clip_tri.v2.normal = (trans_inv * clip_tri.v2.normal.extend(0.0)).xyz();
+
+    match clip_cull_triangle(&clip_tri) {
+        ClipResult::None => {}
+        ClipResult::One(tri) => {
+            raster_clipped_triangle_for_text(&tri, texture, buffer, z_buffer, viewport_size);
+        }
+        ClipResult::Two(tri) => {
+            raster_clipped_triangle_for_text(&tri.0, texture, buffer, z_buffer, viewport_size);
+            raster_clipped_triangle_for_text(&tri.1, texture, buffer, z_buffer, viewport_size);
+        }
+    }
+}
+
+pub fn raster_mesh_for_text(
+    mesh: &Mesh,
+    model_matrix: &Mat4,
+    mvp: &Mat4,
+    texture: Option<&Texture>,
+    buffer: &mut Vec<u32>,
+    z_buffer: &mut Vec<f32>,
+    viewport_size: Vec2,
+) {
+    for triangle_indices in &mesh.triangle_indices {
+        let vertices = mesh.get_vertices_from_triangle_indices(*triangle_indices);
+        raster_triangle_for_text(
+            &vertices,
+            model_matrix,
+            mvp,
+            texture,
+            buffer,
+            z_buffer,
+            viewport_size,
+        );
+    }
 }
