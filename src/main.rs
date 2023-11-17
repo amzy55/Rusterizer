@@ -50,7 +50,8 @@ fn main() {
     // Limit to max ~60 fps update rate
     // window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
-    let texture = Texture::load(Path::new("assets/giorno_stare_1024.jpg"));
+    let texture = Texture::load(Path::new("assets/textures/giorno_stare_1024.jpg"));
+    let model = load_gltf(Path::new("assets/gltf_models/teapot.gltf"));
     let window_size = glam::vec2(WIDTH as f32, HEIGHT as f32);
 
     let side: f32 = 2.0;
@@ -153,18 +154,27 @@ fn main() {
             Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0))
                 .local();
         let mvp = camera.projection() * camera.view() * parent_local;
-        for transform in transforms {
-            raster_mesh(
-                &quad,
-                &(mvp * transform.local()),
-                &texture,
-                &mut buffer,
-                &mut z_buffer,
-                window_size,
-            );
-        }
+        // for transform in transforms {
+        //     raster_mesh(
+        //         &quad,
+        //         &(mvp * transform.local()),
+        //         &texture,
+        //         &mut buffer,
+        //         &mut z_buffer,
+        //         window_size,
+        //     );
+        // }
 
-        rot += 2.0 * dt as f32;
+        raster_mesh(
+            &model,
+            &(mvp * parent_local),
+            &texture,
+            &mut buffer,
+            &mut z_buffer,
+            window_size,
+        );
+
+        rot += 0.5 * dt as f32;
         start_time = end_time;
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }

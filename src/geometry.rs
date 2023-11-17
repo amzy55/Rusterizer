@@ -122,6 +122,69 @@ pub struct Mesh {
 }
 
 impl Mesh {
+    pub fn new() -> Self {
+        Self {
+            triangle_indices: Vec::new(),
+            vertices: Vec::new(),
+        }
+    }
+
+    pub fn add_section_from_buffers(
+        &mut self,
+        triangles: &[UVec3],
+        positions: &[Vec3],
+        colors: &[Vec3],
+        uvs: &[Vec2],
+    ) {
+        self.triangle_indices.extend_from_slice(triangles);
+
+        let has_uvs = !uvs.is_empty();
+        let has_colors = !colors.is_empty();
+
+        for i in 0..positions.len() {
+            let vertex = Vertex::new(
+                positions[i].extend(1.0),
+                if has_colors { colors[i] } else { Vec3::ONE },
+                if has_uvs { uvs[i] } else { Vec2::ZERO },
+            );
+            self.vertices.push(vertex)
+        }
+    }
+
+    pub fn load_from_gltf(mesh: &gltf::Mesh, buffers: &[gltf::buffer::Data]) -> Mesh {
+        let mut positions: Vec<Vec3> = Vec::new();
+        let mut tex_coords: Vec<Vec2> = Vec::new();
+        let mut indices = vec![];
+        // TODO: handle errors
+        let mut result = Mesh::new();
+        for primitive in mesh.primitives() {
+            let reader = primitive.reader(|buffer| Some(&buffers[buffer.index()]));
+            if let Some(indices_reader) = reader.read_indices() {
+                indices_reader.into_u32().for_each(|i| indices.push(i));
+            }
+            if let Some(positions_reader) = reader.read_positions() {
+                positions_reader.for_each(|p| positions.push(Vec3::new(p[0], p[1], p[2])));
+            }
+            if let Some(tex_coord_reader) = reader.read_tex_coords(0) {
+                tex_coord_reader
+                    .into_f32()
+                    .for_each(|tc| tex_coords.push(Vec2::new(tc[0], tc[1])));
+            }
+
+            let colors: Vec<Vec3> = positions.iter().map(|_| Vec3::ONE).collect();
+            println!("Num indices: {:?}", indices.len());
+            println!("tex_coords: {:?}", tex_coords.len());
+            println!("positions: {:?}", positions.len());
+
+            let triangles: Vec<UVec3> = indices
+                .chunks_exact(3)
+                .map(|tri| UVec3::new(tri[0], tri[1], tri[2]))
+                .collect();
+            result.add_section_from_buffers(&triangles, &positions, &colors, &tex_coords)
+        }
+        result
+    }
+
     pub fn get_vertices_from_triangle_indices(&self, triangle_indices: UVec3) -> [Vertex; 3] {
         [
             self.vertices[triangle_indices.x as usize],
