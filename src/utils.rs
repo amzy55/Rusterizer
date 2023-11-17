@@ -36,7 +36,7 @@ pub fn barycentric_coords(
     let w1 = edge_function(point, v2, v0) * reverse_area;
     let w2 = 1.0 - w0 - w1; // no need t do a third edge function because w0 + w1 + w2 = 1.0
 
-    if (w0 <= 0.0 && w1 <= 0.0 && w2 <= 0.0) || (w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0) {
+    if w0 >= 0.0 && w1 >= 0.0 && w2 >= 0.0 {
         Some(Vec3 {
             x: w0,
             y: w1,
