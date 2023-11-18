@@ -53,8 +53,8 @@ fn main() {
     // Limit to max ~60 fps update rate
     // window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
-    let _texture = Texture::load(Path::new("assets/textures/bee_icon_256.png"));
-    let _model = load_gltf(Path::new(
+    let texture = Texture::load(Path::new("assets/textures/bee_icon_256.png"));
+    let model = load_gltf(Path::new(
         "assets/gltf_models/damaged_helmet/DamagedHelmet.gltf",
     ));
     let window_size = glam::vec2(WIDTH as f32, HEIGHT as f32);
@@ -165,7 +165,7 @@ fn main() {
         let parent_local =
             Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0))
                 .local();
-        let _mvp = camera.projection() * camera.view() * parent_local;
+        let mvp = camera.projection() * camera.view() * parent_local;
         // for transform in transforms {
         //     raster_mesh(
         //         &quad,
@@ -177,54 +177,19 @@ fn main() {
         //     );
         // }
 
-        // raster_mesh(
-        //     &model,
-        //     &(mvp),
-        //     &parent_local,
-        //     Some(&texture),
-        //     &mut buffer,
-        //     &mut z_buffer,
-        //     window_size,
-        // );
+        raster_mesh(
+            &model,
+            &(mvp),
+            &parent_local,
+            Some(&texture),
+            &mut buffer,
+            &mut z_buffer,
+            window_size,
+        );
 
         let _text_mvp = camera.projection() * camera.view() * glam::Mat4::IDENTITY;
-        let text_pos = Vec2::new(WIDTH as f32 * 0.12, 50.0);
-        font.text(" !\"#$%&\'()*+,-.".to_string(), text_pos);
-        font.text(
-            "/0123456789:;<=".to_string(),
-            Vec2 {
-                x: text_pos.x,
-                y: text_pos.y + 30.0,
-            },
-        );
-        font.text(
-            ">?@abcdefghijkl".to_string(),
-            Vec2 {
-                x: text_pos.x,
-                y: text_pos.y + 30.0 * 2.0,
-            },
-        );
-        font.text(
-            "mnopqrstuvwxyz[".to_string(),
-            Vec2 {
-                x: text_pos.x,
-                y: text_pos.y + 30.0 * 3.0,
-            },
-        );
-        font.text(
-            "\\]^_(|)~á".to_string(),
-            Vec2 {
-                x: text_pos.x,
-                y: text_pos.y + 30.0 * 4.0,
-            },
-        );
-        font.text(
-            "hello, world!".to_string(),
-            Vec2 {
-                x: text_pos.x - 30.0,
-                y: text_pos.y + 30.0 * 5.5,
-            },
-        );
+        let text_pos = Vec2::new(50.0, HEIGHT as f32 / 2.0);
+        font.text("The coolest rasterizer ever!".to_string(), text_pos);
         font.render(&mut buffer, &mut z_buffer, window_size);
 
         rot += 0.5 * dt as f32;
