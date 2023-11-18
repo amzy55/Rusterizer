@@ -1,4 +1,4 @@
-use glam::{UVec3, Vec2, Vec3, Vec4};
+use glam::{Vec2, Vec3};
 use minifb::{Key, Window, WindowOptions};
 use std::path::Path;
 
@@ -59,79 +59,6 @@ fn main() {
     ));
     let window_size = glam::vec2(WIDTH as f32, HEIGHT as f32);
 
-    let side: f32 = 2.0;
-    let top_left = Vec2::new(-1.0, -1.0);
-    let bottom_right = top_left + side;
-
-    let v0 = Vertex {
-        pos: Vec4::new(top_left.x, top_left.y, 1.0, 1.0),
-        normal: Vec3::new(0.0, 0.0, 1.0),
-        color: Vec3::new(1.0, 1.0, 1.0),
-        uv: glam::vec2(0.0, 0.0),
-    };
-    let v1 = Vertex {
-        pos: Vec4::new(top_left.x, bottom_right.y, 1.0, 1.0),
-        normal: Vec3::new(0.0, 0.0, 1.0),
-        color: Vec3::new(1.0, 1.0, 1.0),
-        uv: glam::vec2(0.0, 1.0),
-    };
-    let v2 = Vertex {
-        pos: Vec4::new(bottom_right.x, top_left.y, 1.0, 1.0),
-        normal: Vec3::new(0.0, 0.0, 1.0),
-        color: Vec3::new(1.0, 1.0, 1.0),
-        uv: glam::vec2(1.0, 0.0),
-    };
-    let v3 = Vertex {
-        pos: Vec4::new(bottom_right.x, bottom_right.y, 1.0, 1.0),
-        normal: Vec3::new(0.0, 0.0, 1.0),
-        color: Vec3::new(1.0, 1.0, 1.0),
-        uv: glam::vec2(1.0, 1.0),
-    };
-
-    let quad = Mesh {
-        triangle_indices: vec![UVec3::new(0, 1, 2), UVec3::new(2, 1, 3)],
-        vertices: vec![v0, v1, v2, v3],
-    };
-
-    let transforms = [
-        Transform::IDENTITY,
-        //-z
-        Transform::from_rotation(glam::Quat::from_euler(
-            glam::EulerRot::XYZ,
-            -std::f32::consts::PI,
-            0.0,
-            0.0,
-        )),
-        //+y
-        Transform::from_rotation(glam::Quat::from_euler(
-            glam::EulerRot::XYZ,
-            std::f32::consts::FRAC_PI_2,
-            0.0,
-            0.0,
-        )),
-        //-y
-        Transform::from_rotation(glam::Quat::from_euler(
-            glam::EulerRot::XYZ,
-            -std::f32::consts::FRAC_PI_2,
-            0.0,
-            0.0,
-        )),
-        //+x
-        Transform::from_rotation(glam::Quat::from_euler(
-            glam::EulerRot::XYZ,
-            0.0,
-            -std::f32::consts::FRAC_PI_2,
-            0.0,
-        )),
-        //-x
-        Transform::from_rotation(glam::Quat::from_euler(
-            glam::EulerRot::XYZ,
-            0.0,
-            std::f32::consts::FRAC_PI_2,
-            0.0,
-        )),
-    ];
-
     let aspect_ratio = WIDTH as f32 / HEIGHT as f32;
     let mut camera = Camera {
         aspect_ratio,
@@ -166,27 +93,16 @@ fn main() {
             Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0))
                 .local();
         let mvp = camera.projection() * camera.view() * parent_local;
-        for transform in transforms {
-            raster_mesh(
-                &quad,
-                &transform.local(),
-                &(mvp * transform.local()),
-                Some(&texture),
-                &mut buffer,
-                &mut z_buffer,
-                window_size,
-            );
-        }
 
-        // raster_mesh(
-        //     &model,
-        //     &(mvp),
-        //     &parent_local,
-        //     Some(&texture),
-        //     &mut buffer,
-        //     &mut z_buffer,
-        //     window_size,
-        // );
+        raster_mesh(
+            &model,
+            &(mvp),
+            &parent_local,
+            Some(&texture),
+            &mut buffer,
+            &mut z_buffer,
+            window_size,
+        );
 
         let _text_mvp = camera.projection() * camera.view() * glam::Mat4::IDENTITY;
         let text_pos = Vec2::new(50.0, HEIGHT as f32 / 2.0);
