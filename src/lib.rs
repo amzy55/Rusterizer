@@ -402,9 +402,6 @@ pub fn raster_clipped_triangle_for_text(
                     let depth = bary.x * ndc0.z + bary.y * ndc1.z + bary.z * ndc2.z;
                     if depth < z_buffer[pixel_id] {
                         z_buffer[pixel_id] = depth;
-                        let normal =
-                            bary.x * pv0.normal + bary.y * pv1.normal + bary.z * pv2.normal;
-                        let normal = normal * correction;
                         let color = bary.x * pv0.color + bary.y * pv1.color + bary.z * pv2.color;
                         let color = color * correction;
                         match texture {
@@ -417,12 +414,14 @@ pub fn raster_clipped_triangle_for_text(
                                 let r = (tex_color >> 16) as u8;
                                 let g = (tex_color >> 8) as u8;
                                 let b = tex_color as u8;
-                                buffer[pixel_id] = from_u8_argb(
-                                    a,
-                                    (r as f32 * color.x) as u8,
-                                    (g as f32 * color.y) as u8,
-                                    (b as f32 * color.z) as u8,
-                                );
+                                if a != '\0' as u8 {
+                                    buffer[pixel_id] = from_u8_argb(
+                                        a,
+                                        (r as f32 * color.x) as u8,
+                                        (g as f32 * color.y) as u8,
+                                        (b as f32 * color.z) as u8,
+                                    );
+                                }
                             }
                             None => {
                                 buffer[pixel_id] = from_u8_rgb(

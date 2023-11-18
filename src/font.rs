@@ -9,7 +9,7 @@ use std::path::Path;
 pub struct Font {
     pub(crate) texture: Texture,
     pub(crate) symbol_size: u32,
-    pub(crate) symbol_pos_map: HashMap<char, usize>,
+    pub(crate) symbol_pos_map: HashMap<char, u32>,
     pub(crate) to_render: Vec<Mesh>,
 }
 
@@ -48,37 +48,67 @@ impl Default for Font {
         map.insert(char::from('='), 29);
         map.insert(char::from('>'), 30);
         map.insert(char::from('?'), 31);
-        map.insert(char::from('a'), 32);
-        map.insert(char::from('b'), 33);
-        map.insert(char::from('c'), 34);
-        map.insert(char::from('d'), 35);
-        map.insert(char::from('e'), 36);
-        map.insert(char::from('f'), 37);
-        map.insert(char::from('g'), 38);
-        map.insert(char::from('h'), 39);
-        map.insert(char::from('i'), 40);
-        map.insert(char::from('j'), 41);
-        map.insert(char::from('k'), 42);
-        map.insert(char::from('l'), 43);
-        map.insert(char::from('m'), 44);
-        map.insert(char::from('n'), 45);
-        map.insert(char::from('o'), 46);
-        map.insert(char::from('p'), 47);
-        map.insert(char::from('q'), 48);
-        map.insert(char::from('r'), 49);
-        map.insert(char::from('s'), 50);
-        map.insert(char::from('t'), 51);
-        map.insert(char::from('u'), 52);
-        map.insert(char::from('v'), 53);
-        map.insert(char::from('w'), 54);
-        map.insert(char::from('x'), 55);
-        map.insert(char::from('y'), 56);
-        map.insert(char::from('z'), 57);
-        map.insert(char::from('['), 58);
-        map.insert(char::from('/'), 59);
-        map.insert(char::from(']'), 60);
-        map.insert(char::from('^'), 61);
-        map.insert(char::from('_'), 62);
+        map.insert(char::from('@'), 32);
+        map.insert(char::from('a'), 33);
+        map.insert(char::from('A'), 33);
+        map.insert(char::from('b'), 34);
+        map.insert(char::from('B'), 34);
+        map.insert(char::from('c'), 35);
+        map.insert(char::from('C'), 35);
+        map.insert(char::from('d'), 36);
+        map.insert(char::from('D'), 36);
+        map.insert(char::from('e'), 37);
+        map.insert(char::from('E'), 37);
+        map.insert(char::from('f'), 38);
+        map.insert(char::from('F'), 38);
+        map.insert(char::from('g'), 39);
+        map.insert(char::from('G'), 39);
+        map.insert(char::from('h'), 40);
+        map.insert(char::from('H'), 40);
+        map.insert(char::from('i'), 41);
+        map.insert(char::from('I'), 41);
+        map.insert(char::from('j'), 42);
+        map.insert(char::from('J'), 42);
+        map.insert(char::from('k'), 43);
+        map.insert(char::from('K'), 43);
+        map.insert(char::from('l'), 44);
+        map.insert(char::from('L'), 44);
+        map.insert(char::from('m'), 45);
+        map.insert(char::from('M'), 45);
+        map.insert(char::from('n'), 46);
+        map.insert(char::from('N'), 46);
+        map.insert(char::from('o'), 47);
+        map.insert(char::from('O'), 47);
+        map.insert(char::from('p'), 48);
+        map.insert(char::from('P'), 48);
+        map.insert(char::from('q'), 49);
+        map.insert(char::from('Q'), 49);
+        map.insert(char::from('r'), 50);
+        map.insert(char::from('R'), 50);
+        map.insert(char::from('s'), 51);
+        map.insert(char::from('S'), 51);
+        map.insert(char::from('t'), 52);
+        map.insert(char::from('T'), 52);
+        map.insert(char::from('u'), 53);
+        map.insert(char::from('U'), 53);
+        map.insert(char::from('v'), 54);
+        map.insert(char::from('V'), 54);
+        map.insert(char::from('w'), 55);
+        map.insert(char::from('W'), 55);
+        map.insert(char::from('x'), 56);
+        map.insert(char::from('X'), 56);
+        map.insert(char::from('y'), 57);
+        map.insert(char::from('Y'), 57);
+        map.insert(char::from('z'), 58);
+        map.insert(char::from('Z'), 58);
+        map.insert(char::from('['), 59);
+        map.insert(char::from('\\'), 60);
+        map.insert(char::from(']'), 61);
+        map.insert(char::from('^'), 62);
+        map.insert(char::from('_'), 63);
+        map.insert(char::from('|'), 92);
+        map.insert(char::from('~'), 94);
+        map.insert(char::from('á'), 102);
 
         let font_texture = Texture::load(Path::new("assets/fonts/outline_cute.png"));
 
@@ -93,7 +123,7 @@ impl Default for Font {
 
 // only supporting lowercase for now
 impl Font {
-    pub fn text(&mut self, text: String, pos: Vec2) {        
+    pub fn text(&mut self, text: String, pos: Vec2) {
         let symbol_percentage_x = self.symbol_size as f32 / self.texture.width as f32;
         let symbol_percentage_y = self.symbol_size as f32 / self.texture.height as f32;
 
@@ -116,14 +146,19 @@ impl Font {
             uv: glam::vec2(1.0, 0.0),
         };
         let mut v3 = Vertex {
-            pos: Vec4::new(pos.x + symbol_percentage_x, pos.y + symbol_percentage_y, 1.0, 1.0),
+            pos: Vec4::new(
+                pos.x + symbol_percentage_x,
+                pos.y + symbol_percentage_y,
+                1.0,
+                1.0,
+            ),
             normal: Vec3::new(0.0, 0.0, 1.0),
             color: Vec3::new(1.0, 1.0, 1.0),
             uv: glam::vec2(1.0, 1.0),
         };
 
-        let image_number_of_symbols_width = self.texture.width / self.symbol_size as usize;
-        let image_number_of_symbols_height = self.texture.height / self.symbol_size as usize;
+        let image_number_of_symbols_width = self.texture.width as u32 / self.symbol_size;
+        let image_number_of_symbols_height = self.texture.height as u32 / self.symbol_size;
 
         for (i, char) in text.chars().enumerate() {
             let screen_offset_x = i as f32 * symbol_percentage_x;
@@ -134,10 +169,7 @@ impl Font {
             v3.pos.x += screen_offset_x;
 
             if let Some(symbol_index) = self.symbol_pos_map.get(&char) {
-                let mut texture_pos_x = symbol_index % image_number_of_symbols_width;
-                if *symbol_index >= image_number_of_symbols_width {
-                    texture_pos_x += 1; // not sure why yet
-                }
+                let texture_pos_x = symbol_index % image_number_of_symbols_width;
                 let texture_pos_y = symbol_index / image_number_of_symbols_width;
 
                 v0.uv.x = texture_pos_x as f32 / image_number_of_symbols_width as f32;
@@ -154,7 +186,7 @@ impl Font {
                     vertices: vec![v0, v1, v2, v3],
                 });
             } else {
-                panic!("Error while printing text.");
+                println!("Symbol \"{}\" is not supported yet!", char);
             }
 
             // reset positions
@@ -165,10 +197,24 @@ impl Font {
         }
     }
 
-    pub fn render(&mut self, buffer: &mut Vec<u32>, z_buffer: &mut Vec<f32>, mvp: &Mat4, viewport_size: Vec2) {
+    pub fn render(
+        &mut self,
+        buffer: &mut Vec<u32>,
+        z_buffer: &mut Vec<f32>,
+        mvp: &Mat4,
+        viewport_size: Vec2,
+    ) {
         let identity = Mat4::IDENTITY;
-    for quad in &self.to_render {
-        rusterizer::raster_mesh_for_text(quad, &identity, mvp, Some(&self.texture), buffer, z_buffer, viewport_size);      
+        for quad in &self.to_render {
+            rusterizer::raster_mesh_for_text(
+                quad,
+                &identity,
+                mvp,
+                Some(&self.texture),
+                buffer,
+                z_buffer,
+                viewport_size,
+            );
         }
         self.to_render.clear();
     }

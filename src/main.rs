@@ -53,8 +53,8 @@ fn main() {
     // Limit to max ~60 fps update rate
     // window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
-    let texture = Texture::load(Path::new("assets/textures/bee_icon_256.png"));
-    let model = load_gltf(Path::new(
+    let _texture = Texture::load(Path::new("assets/textures/bee_icon_256.png"));
+    let _model = load_gltf(Path::new(
         "assets/gltf_models/damaged_helmet/DamagedHelmet.gltf",
     ));
     let window_size = glam::vec2(WIDTH as f32, HEIGHT as f32);
@@ -188,8 +188,13 @@ fn main() {
         // );
 
         let _text_mvp = camera.projection() * camera.view() * glam::Mat4::IDENTITY;
-        font.text("text!./ ".to_string(), Vec2{ x: -0.5, y: -0.5});
-        font.text("*i can type stuff*".to_string(), Vec2{ x: -0.5, y: -0.25});
+        font.text(" !\"#$%&\'()*+,-.".to_string(), Vec2 { x: -0.5, y: -0.75 });
+        font.text("/0123456789:;<=".to_string(), Vec2 { x: -0.5, y: -0.5 });
+        font.text(">?@abcdefghijkl".to_string(), Vec2 { x: -0.5, y: -0.25 });
+        font.text("mnopqrstuvwxyz[".to_string(), Vec2 { x: -0.5, y: 0.0 });
+        font.text("\\]^_ ABCDEFGHIJ".to_string(), Vec2 { x: -0.5, y: 0.25 });
+        font.text("KLMNOPQRSTUVWXY".to_string(), Vec2 { x: -0.5, y: 0.5 });
+        font.text("Z(|)~á".to_string(), Vec2 { x: -0.5, y: 0.75 });
         font.render(&mut buffer, &mut z_buffer, &mvp, window_size);
 
         rot += 0.5 * dt as f32;
