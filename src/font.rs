@@ -1,4 +1,4 @@
-use glam::{Mat4, UVec3, Vec2, Vec3, Vec4};
+use glam::{UVec3, Vec2, Vec3, Vec4};
 use rusterizer::Vertex;
 
 use crate::Mesh;
@@ -124,34 +124,28 @@ impl Default for Font {
 // only supporting lowercase for now
 impl Font {
     pub fn text(&mut self, text: String, pos: Vec2) {
-        let symbol_percentage_x = self.symbol_size as f32 / self.texture.width as f32;
-        let symbol_percentage_y = self.symbol_size as f32 / self.texture.height as f32;
+        let symbol_size_f32 = self.symbol_size as f32;
 
         let mut v0 = Vertex {
-            pos: Vec4::new(pos.x, pos.y, 1.0, 1.0),
+            pos: Vec4::new(pos.x, pos.y, 0.0, 1.0),
             normal: Vec3::new(0.0, 0.0, 1.0),
             color: Vec3::new(1.0, 1.0, 1.0),
             uv: glam::vec2(0.0, 0.0),
         };
         let mut v1 = Vertex {
-            pos: Vec4::new(pos.x, pos.y + symbol_percentage_y, 1.0, 1.0),
+            pos: Vec4::new(pos.x, pos.y + symbol_size_f32, 0.0, 1.0),
             normal: Vec3::new(0.0, 0.0, 1.0),
             color: Vec3::new(1.0, 1.0, 1.0),
             uv: glam::vec2(0.0, 1.0),
         };
         let mut v2 = Vertex {
-            pos: Vec4::new(pos.x + symbol_percentage_x, pos.y, 1.0, 1.0),
+            pos: Vec4::new(pos.x + symbol_size_f32, pos.y, 0.0, 1.0),
             normal: Vec3::new(0.0, 0.0, 1.0),
             color: Vec3::new(1.0, 1.0, 1.0),
             uv: glam::vec2(1.0, 0.0),
         };
         let mut v3 = Vertex {
-            pos: Vec4::new(
-                pos.x + symbol_percentage_x,
-                pos.y + symbol_percentage_y,
-                1.0,
-                1.0,
-            ),
+            pos: Vec4::new(pos.x + symbol_size_f32, pos.y + symbol_size_f32, 0.0, 1.0),
             normal: Vec3::new(0.0, 0.0, 1.0),
             color: Vec3::new(1.0, 1.0, 1.0),
             uv: glam::vec2(1.0, 1.0),
@@ -160,8 +154,11 @@ impl Font {
         let image_number_of_symbols_width = self.texture.width as u32 / self.symbol_size;
         let image_number_of_symbols_height = self.texture.height as u32 / self.symbol_size;
 
+        let symbol_percentage_x = self.symbol_size as f32 / self.texture.width as f32;
+        let symbol_percentage_y = self.symbol_size as f32 / self.texture.height as f32;
+
         for (i, char) in text.chars().enumerate() {
-            let screen_offset_x = i as f32 * symbol_percentage_x;
+            let screen_offset_x = i as f32 * symbol_size_f32;
 
             v0.pos.x += screen_offset_x;
             v1.pos.x += screen_offset_x;
@@ -197,24 +194,9 @@ impl Font {
         }
     }
 
-    pub fn render(
-        &mut self,
-        buffer: &mut Vec<u32>,
-        z_buffer: &mut Vec<f32>,
-        mvp: &Mat4,
-        viewport_size: Vec2,
-    ) {
-        let identity = Mat4::IDENTITY;
+    pub fn render(&mut self, buffer: &mut Vec<u32>, z_buffer: &mut Vec<f32>, viewport_size: Vec2) {
         for quad in &self.to_render {
-            rusterizer::raster_mesh_for_text(
-                quad,
-                &identity,
-                mvp,
-                Some(&self.texture),
-                buffer,
-                z_buffer,
-                viewport_size,
-            );
+            rusterizer::raster_mesh_2d(quad, Some(&self.texture), buffer, z_buffer, viewport_size);
         }
         self.to_render.clear();
     }

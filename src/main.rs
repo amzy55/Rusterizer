@@ -165,7 +165,7 @@ fn main() {
         let parent_local =
             Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0))
                 .local();
-        let mvp = camera.projection() * camera.view() * parent_local;
+        let _mvp = camera.projection() * camera.view() * parent_local;
         // for transform in transforms {
         //     raster_mesh(
         //         &quad,
@@ -188,14 +188,44 @@ fn main() {
         // );
 
         let _text_mvp = camera.projection() * camera.view() * glam::Mat4::IDENTITY;
-        font.text(" !\"#$%&\'()*+,-.".to_string(), Vec2 { x: -0.5, y: -0.75 });
-        font.text("/0123456789:;<=".to_string(), Vec2 { x: -0.5, y: -0.5 });
-        font.text(">?@abcdefghijkl".to_string(), Vec2 { x: -0.5, y: -0.25 });
-        font.text("mnopqrstuvwxyz[".to_string(), Vec2 { x: -0.5, y: 0.0 });
-        font.text("\\]^_ ABCDEFGHIJ".to_string(), Vec2 { x: -0.5, y: 0.25 });
-        font.text("KLMNOPQRSTUVWXY".to_string(), Vec2 { x: -0.5, y: 0.5 });
-        font.text("Z(|)~á".to_string(), Vec2 { x: -0.5, y: 0.75 });
-        font.render(&mut buffer, &mut z_buffer, &mvp, window_size);
+        let text_pos = Vec2::new(WIDTH as f32 * 0.12, 50.0);
+        font.text(" !\"#$%&\'()*+,-.".to_string(), text_pos);
+        font.text(
+            "/0123456789:;<=".to_string(),
+            Vec2 {
+                x: text_pos.x,
+                y: text_pos.y + 30.0,
+            },
+        );
+        font.text(
+            ">?@abcdefghijkl".to_string(),
+            Vec2 {
+                x: text_pos.x,
+                y: text_pos.y + 30.0 * 2.0,
+            },
+        );
+        font.text(
+            "mnopqrstuvwxyz[".to_string(),
+            Vec2 {
+                x: text_pos.x,
+                y: text_pos.y + 30.0 * 3.0,
+            },
+        );
+        font.text(
+            "\\]^_(|)~á".to_string(),
+            Vec2 {
+                x: text_pos.x,
+                y: text_pos.y + 30.0 * 4.0,
+            },
+        );
+        font.text(
+            "hello, world!".to_string(),
+            Vec2 {
+                x: text_pos.x - 30.0,
+                y: text_pos.y + 30.0 * 5.5,
+            },
+        );
+        font.render(&mut buffer, &mut z_buffer, window_size);
 
         rot += 0.5 * dt as f32;
         start_time = end_time;
