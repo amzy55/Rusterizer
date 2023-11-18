@@ -379,7 +379,7 @@ pub fn raster_triangle_2d(
                 {
                     let color = bary.x * v0.color + bary.y * v1.color + bary.z * v2.color;
                     let depth = bary.x * v0.pos.z + bary.y * v1.pos.z + bary.z * v2.pos.z;
-                    if depth < z_buffer[pixel_id] {
+                    if depth <= z_buffer[pixel_id] {
                         z_buffer[pixel_id] = depth;
                         match &texture {
                             Some(texture) => {

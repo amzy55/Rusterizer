@@ -158,7 +158,8 @@ impl Font {
         let symbol_percentage_y = self.symbol_size as f32 / self.texture.height as f32;
 
         for (i, char) in text.chars().enumerate() {
-            let screen_offset_x = i as f32 * symbol_size_f32;
+            let screen_offset_x = i as f32 * (symbol_size_f32 - 4.0);
+            // -4 because the letters look better closer together
 
             v0.pos.x += screen_offset_x;
             v1.pos.x += screen_offset_x;

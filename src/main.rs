@@ -36,7 +36,7 @@ fn input_handling(dt: f32, window: &Window, camera: &mut Camera) {
 }
 
 fn main() {
-    let grey = from_u8_rgb(100, 100, 100);
+    let grey = from_u8_rgb(100, 100, 200);
     let mut buffer: Vec<u32> = vec![grey; WIDTH * HEIGHT];
     let mut z_buffer = vec![f32::INFINITY; WIDTH * HEIGHT];
 
