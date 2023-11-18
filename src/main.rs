@@ -88,12 +88,12 @@ fn main() {
         uv: glam::vec2(1.0, 1.0),
     };
 
-    let _quad = Mesh {
+    let quad = Mesh {
         triangle_indices: vec![UVec3::new(0, 1, 2), UVec3::new(2, 1, 3)],
         vertices: vec![v0, v1, v2, v3],
     };
 
-    let _transforms = [
+    let transforms = [
         Transform::IDENTITY,
         //-z
         Transform::from_rotation(glam::Quat::from_euler(
@@ -166,26 +166,27 @@ fn main() {
             Transform::from_rotation(glam::Quat::from_euler(glam::EulerRot::XYZ, rot, 0.0, 0.0))
                 .local();
         let mvp = camera.projection() * camera.view() * parent_local;
-        // for transform in transforms {
-        //     raster_mesh(
-        //         &quad,
-        //         &(mvp * transform.local()),
-        //         &texture,
-        //         &mut buffer,
-        //         &mut z_buffer,
-        //         window_size,
-        //     );
-        // }
+        for transform in transforms {
+            raster_mesh(
+                &quad,
+                &transform.local(),
+                &(mvp * transform.local()),
+                Some(&texture),
+                &mut buffer,
+                &mut z_buffer,
+                window_size,
+            );
+        }
 
-        raster_mesh(
-            &model,
-            &(mvp),
-            &parent_local,
-            Some(&texture),
-            &mut buffer,
-            &mut z_buffer,
-            window_size,
-        );
+        // raster_mesh(
+        //     &model,
+        //     &(mvp),
+        //     &parent_local,
+        //     Some(&texture),
+        //     &mut buffer,
+        //     &mut z_buffer,
+        //     window_size,
+        // );
 
         let _text_mvp = camera.projection() * camera.view() * glam::Mat4::IDENTITY;
         let text_pos = Vec2::new(50.0, HEIGHT as f32 / 2.0);
